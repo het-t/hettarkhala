@@ -12,10 +12,10 @@ export type Note = {
   category: string;
   categorySlug: string;
   title: string;
-  author?: string;
-  date?: string;
-  status?: string;
-  description?: string;
+  author?: string | undefined;
+  date?: string | undefined;
+  status?: string | undefined;
+  description?: string | undefined;
   content: string;
   wordCount: number;
 };
@@ -38,9 +38,10 @@ function titleize(value: string): string {
 
 function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
   const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/.exec(raw);
-  if (!match) return { data: {}, body: raw };
+  const block = match?.[1];
+  if (!match || block === undefined) return { data: {}, body: raw };
   const data: Record<string, string> = {};
-  for (const line of match[1].split(/\r?\n/)) {
+  for (const line of block.split(/\r?\n/)) {
     const idx = line.indexOf(":");
     if (idx === -1) continue;
     const key = line.slice(0, idx).trim();
@@ -63,21 +64,22 @@ function build(): Note[] {
     // Files directly inside master-data/ (like README.md) are not notes.
     if (segments.length < 2) continue;
 
-    const fileName = segments[segments.length - 1].replace(/\.md$/i, "");
+    const fileName = (segments[segments.length - 1] ?? "").replace(/\.md$/i, "");
     const category = titleize(segments.slice(0, -1).join(" / "));
     const { data, body } = parseFrontmatter(raw);
+    const content = body.trim();
 
     notes.push({
       slug: slugify(fileName),
       category,
-      categorySlug: slugify(segments[0]),
-      title: data.title || titleize(fileName),
-      author: data.author,
-      date: data.date,
-      status: data.status,
-      description: data.description,
-      content: body.trim(),
-      wordCount: body.trim().split(/\s+/).filter(Boolean).length,
+      categorySlug: slugify(segments[0] ?? ""),
+      title: data["title"] || titleize(fileName),
+      author: data["author"],
+      date: data["date"],
+      status: data["status"],
+      description: data["description"],
+      content,
+      wordCount: content.split(/\s+/).filter(Boolean).length,
     });
   }
 
