@@ -36,16 +36,27 @@ jobs:
 
       - name: Prepare GitHub Pages
         run: |
-          cp .output/public/index.html .output/public/404.html
-
-      - name: Inspect generated HTML
-        run: |
-          echo "===== index.html ====="
-          sed -n '1,120p' .output/public/index.html
-
-          echo "===== Asset references ====="
+          echo "===== Before modification ====="
           grep -oE '(href|src)="[^"]+"' .output/public/index.html || true
 
+          # GitHub Pages repository base path
+          sed -i 's|href="/assets/|href="/hettarkhala/assets/|g' .output/public/index.html
+          sed -i 's|src="/assets/|src="/hettarkhala/assets/|g' .output/public/index.html
+          sed -i 's|href="/favicon.ico"|href="/hettarkhala/favicon.ico"|g' .output/public/index.html
+
+          # Fix application navigation links in the generated HTML
+          sed -i 's|href="/"|href="/hettarkhala/"|g' .output/public/index.html
+          sed -i 's|href="/notes"|href="/hettarkhala/notes"|g' .output/public/index.html
+
+          # GitHub Pages needs index.html for the root page
+          # and 404.html as the SPA fallback.
+          cp .output/public/index.html .output/public/404.html
+
+          echo ""
+          echo "===== After modification ====="
+          grep -oE '(href|src)="[^"]+"' .output/public/index.html || true
+
+          echo ""
           echo "===== Deployment files ====="
           find .output/public -maxdepth 3 -type f | sort
 
