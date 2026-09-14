@@ -35,10 +35,20 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Prepare GitHub Pages
+        run: |
+          cp .output/public/_shell.html .output/public/index.html
+          cp .output/public/_shell.html .output/public/404.html
+
+      - name: Inspect deployment files
+        run: |
+          echo "===== GitHub Pages files ====="
+          find .output/public -maxdepth 3 -type f | sort
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.output
+          path: ./.output/public
 
   deploy:
     runs-on: ubuntu-latest
