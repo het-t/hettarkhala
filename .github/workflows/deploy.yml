@@ -37,8 +37,7 @@ jobs:
 
       - name: Prepare GitHub Pages
         run: |
-          cp .output/public/_shell.html .output/public/index.html
-          cp .output/public/_shell.html .output/public/404.html
+          cp .output/public/index.html .output/public/404.html
 
       - name: Inspect deployment files
         run: |
