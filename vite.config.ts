@@ -4,11 +4,8 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
 
-    prerender: {
+    spa: {
       enabled: true,
-      crawlLinks: true,
-      autoStaticPathsDiscovery: true,
-      autoSubfolderIndex: true,
     },
   },
 });
