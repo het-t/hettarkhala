@@ -29,14 +29,13 @@ function NotesIndex() {
         <p className="label">Open notebook</p>
         <h1 className="mt-4 text-3xl tracking-tight">Notes</h1>
         <p className="mt-4 max-w-xl text-[1.0625rem] leading-relaxed text-muted-foreground">
-          {notes.length} notes across {categories.length} subjects. Everything here is written
-          while reading, then trimmed to what still holds up.
+          {notes.length} notes across {categories.length} subjects. Written while learning, refined through understanding, and kept as a record of ideas worth returning to.
         </p>
       </header>
 
       {categories.length === 0 ? (
         <p className="py-16 text-muted-foreground">
-          No notes yet — add a markdown file inside a subfolder of <code>master-data/</code>.
+          No notes yet.
         </p>
       ) : (
         categories.map((category) => (
