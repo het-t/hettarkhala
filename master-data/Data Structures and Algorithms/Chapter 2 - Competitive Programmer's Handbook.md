@@ -1,7 +1,7 @@
 ---
 title: Chapter 2 - Competitive Programmer's Handbook
 author: Antti Laaksonen
-date: 2026-09-12
+date: 2026-09-13
 status: completed
 description: Time complexity and Kadane’s algorithm.
 ---
