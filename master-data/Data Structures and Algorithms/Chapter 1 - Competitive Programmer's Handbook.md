@@ -2,8 +2,8 @@
 title: Chapter 1 - Competitive Programmer's Handbook
 author: Antti Laaksonen
 date: 2026-09-12
-status: finished
-description: covering the core algorithms, data structures, mathematics, and techniques used in competitive programming.
+status: completed
+description: Covering the data types and common programming techniques.
 ---
 
 # Numbers
