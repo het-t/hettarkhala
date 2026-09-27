@@ -1,5 +1,5 @@
 ---
-title: Deep Learning — Foundations
+title: Deep Learning - Foundations
 author: Goodfellow, Bengio, Courville
 date: 2026-04-02
 status: reading

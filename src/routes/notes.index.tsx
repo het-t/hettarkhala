@@ -6,13 +6,13 @@ import { profile } from "@/lib/profile";
 export const Route = createFileRoute("/notes/")({
   head: () => ({
     meta: [
-      { title: `Notes — ${profile.name}` },
+      { title: `Notes - ${profile.name}` },
       {
         name: "description",
         content:
           "An open notebook: reading notes organised by subject, written while working through books.",
       },
-      { property: "og:title", content: `Notes — ${profile.name}` },
+      { property: "og:title", content: `Notes - ${profile.name}` },
       {
         property: "og:description",
         content: "Reading notes organised by subject, kept in the open.",

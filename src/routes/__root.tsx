@@ -152,7 +152,7 @@ function SiteFooter() {
     <footer className="mt-24 border-t border-rule">
       <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-4 px-6 py-8">
         <p className="label">
-          {profile.name} — reading notes, {new Date().getFullYear()}
+          {profile.name} - reading notes, {new Date().getFullYear()}
         </p>
         <div className="flex gap-5">
           {profile.links.map((l) => (

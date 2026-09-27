@@ -15,7 +15,7 @@ export const Route = createFileRoute("/notes/$category/")({
         meta: [{ title: "Subject not found" }, { name: "robots", content: "noindex" }],
       };
     }
-    const title = `${loaderData.name} notes — ${profile.name}`;
+    const title = `${loaderData.name} notes - ${profile.name}`;
     const description = `${loaderData.count} reading notes on ${loaderData.name}.`;
     return {
       meta: [
