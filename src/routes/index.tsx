@@ -26,9 +26,13 @@ function Index() {
         <h1 className="mt-5 max-w-2xl text-3xl leading-tight tracking-tight text-foreground sm:text-4xl">
           {profile.tagline}
         </h1>
-        <p className="mt-6 max-w-xl text-[1.0625rem] leading-relaxed text-muted-foreground">
-          {profile.summary}
-        </p>
+        <div className="mt-6 max-w-xl text-[1.0625rem] leading-relaxed text-muted-foreground">
+          {profile.summary.split("\n\n").map((p) => (
+            <p key={p.slice(0, 32)} className={p !== profile.summary.split("\n\n")[0] ? "mt-4" : undefined}>
+              {p}
+            </p>
+          ))}
+        </div>
         <div className="mt-8 flex flex-wrap gap-6">
           <Link to="/notes" className="link-quiet text-foreground">
             Read the notes
