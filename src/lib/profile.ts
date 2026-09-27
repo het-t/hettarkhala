@@ -1,12 +1,14 @@
 // Edit these values — they are placeholders until you replace them.
 export const profile = {
   name: "Het Tarkhala",
-  role: "Applied Scientist",
+  role: "Software Developer",
   location: "Ahmedabad, India",
-  tagline:
-    "I read carefully, write down what survives, and build systems from what is left.",
-  summary:
-    "I work at the intersection of machine learning and product. This site is my open notebook: the books I am reading, the notes I keep while reading them, and the ideas that made it into real work.",
+  tagline: "Going down the rabbit hole.",
+  summary: [
+    "I'm interested in software, machine learning, and the systems underneath them.",
+    "When something catches my attention, I tend to go deeper - algorithms, mathematics, databases, distributed systems, whatever happens to be at the bottom of the hole.",
+    "This site is where I keep the things that come out of those rabbit holes: notes, experiments, and projects.",
+  ].join("\n\n"),
   now: [
     "Reading through Probabilistic Machine Learning (by Murphy) end to end, chapter notes in the open.",
     "Writing about systems thinking as a practical tool for engineering teams.",
