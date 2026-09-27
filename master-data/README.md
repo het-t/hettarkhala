@@ -18,4 +18,4 @@ description: One-line summary shown in listings.
 ---
 ```
 
-Nothing else to configure — add, rename, or delete files and the site follows.
+Nothing else to configure - add, rename, or delete files and the site follows.

@@ -6,9 +6,9 @@ import { categories, formatDate, notes } from "@/lib/notes";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${profile.name} — ${profile.role}, reading notes` },
+      { title: `${profile.name} - ${profile.role}, reading notes` },
       { name: "description", content: profile.summary.slice(0, 155) },
-      { property: "og:title", content: `${profile.name} — ${profile.role}` },
+      { property: "og:title", content: `${profile.name} - ${profile.role}` },
       { property: "og:description", content: profile.summary.slice(0, 155) },
     ],
   }),
