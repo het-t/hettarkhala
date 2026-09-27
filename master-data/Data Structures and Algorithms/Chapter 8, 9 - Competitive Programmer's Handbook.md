@@ -3,7 +3,7 @@ title: Chapter 8, 9 - Competitive Programmer's Handbook
 author: Antti Laaksonen
 date: 2026-09-17
 status: finished
-description: 
+description: Fenwick tree, Segment tree.
 ---
 
 Amortized analysis can be used to analyze algorithms that contain operations whose 
