@@ -34,9 +34,6 @@ function Index() {
           ))}
         </div>
         <div className="mt-8 flex flex-wrap gap-6">
-          <Link to="/notes" className="link-quiet text-foreground">
-            Read the notes
-          </Link>
           {profile.links.map((l) => (
             <a key={l.label} href={l.href} className="link-quiet text-muted-foreground">
               {l.label}
