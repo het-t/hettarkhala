@@ -1,5 +1,5 @@
 ---
-title: Chapter 4 - Data structures
+title: Chapter 4 - Competitive Programmer's Handbook
 author: Antti Laaksonen
 date: 2026-09-15
 status: finished
