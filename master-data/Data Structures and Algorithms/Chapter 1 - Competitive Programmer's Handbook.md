@@ -94,8 +94,8 @@ Quantifier specifies how a predicate applies to the elements of a set.
 
 The two common quantifiers are:
 
-* $$\forall\$$: for all
-* $$\exists\$$: there exists
+* $$\forall$$: for all
+* $$\exists$$: there exists
 
 For example, if
 

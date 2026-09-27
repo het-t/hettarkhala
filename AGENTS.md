@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Render note mathematics with remark-math and KaTeX so Markdown source remains portable and readable.
+- Resolve note images from bundled `master-data/assets` by filename so they work in previews and GitHub Pages.
