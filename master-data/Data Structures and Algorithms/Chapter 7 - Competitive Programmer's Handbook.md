@@ -6,7 +6,7 @@ status: finished
 description: Dynamic programming - counting tilings.
 ---
 
-Consider there are n rows and each row has m characters, and we have 1\*2 sized blocks.
+Consider there are n rows and each row has m characters, and we have 1\*2, 2\*1 sized blocks.
 
 Direct formula for calcuating the number of tilings:
 
