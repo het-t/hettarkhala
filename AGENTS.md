@@ -12,3 +12,4 @@
 - Render note mathematics with remark-math and KaTeX so Markdown source remains portable and readable.
 - Resolve note images from bundled `master-data/assets` by filename so they work in previews and GitHub Pages.
 - Use simple hyphens instead of em dashes in all user-facing text for consistent punctuation.
+- Notes whose frontmatter status is "reading"/in-progress/draft are hidden site-wide (filtered in src/lib/notes.ts); only finished/completed notes are published.
