@@ -54,6 +54,13 @@ function parseFrontmatter(raw: string): { data: Record<string, string>; body: st
   return { data, body: raw.slice(match[0].length) };
 }
 
+// Notes still being worked on are not shown anywhere on the site.
+function isInProgress(status?: string): boolean {
+  if (!status) return false;
+  const s = status.trim().toLowerCase();
+  return s === "reading" || s === "draft" || s === "unfinished" || s.includes("progress");
+}
+
 function build(): Note[] {
   const notes: Note[] = [];
 
