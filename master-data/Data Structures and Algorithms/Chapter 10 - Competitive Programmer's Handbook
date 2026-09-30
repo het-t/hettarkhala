@@ -1,0 +1,53 @@
+---
+title: Chapter 10 - Competitive Programmer's Handbook
+author: Antti Laaksonen
+date: 2026-09-12
+status: finished
+description: Bites of bits.
+---
+
+# Bit representation
+All data in computer programs is internally stored as bits.
+Bit representation of a number is either signed or unsigned.
+First bit in a signed representation is the sign of the number and remaining `n-1` bits contain the
+magnitude of the number.
+Opposite number of a number is calculated by two's complement - inverting all the bits and then 
+increasing by one.
+Unsigned representation can only be used to represent positive numbers.
+If the number is a larger than the uppoer bound of the bit representation, the number will overflow 
+and wrap around.
+
+# Bit operations
+and(&), or(|), xor(^), not(~), bit shift(<<, >>)
+
+`__builtin_clz(x)`: number of zeroes at the beginning of the number
+
+`__builtin_ctz(x)`: number of zeroes at the end of the number
+
+`__builtin_popcount(x)`: the number of ones in the number
+
+`__builtin_parity(x)`: parity(even or odd) of the number of ones
+
+# Representing sets
+
+x-bit `int` number can represent any subset of the set $${0, 1,\ldots, x}$$
+
+## Iterating through subsets
+
+Iterate through all subsets with exactly `k` elements of set $${0, 1, \ldots, n-1}$$
+```cpp
+for (int b = 0; b < (1<<n); b++) {
+  // process subset b
+}
+```
+
+Iterate through the subsets of a set `x`
+```cpp
+int b = 0;
+do {
+  // process subset b
+} while (b=(b-x)&x);
+```
+
+# Technique
+Sometimes it is possible to convert problem over permutations to problem over subsets.
