@@ -76,6 +76,9 @@ function build(): Note[] {
     const { data, body } = parseFrontmatter(raw);
     const content = body.trim();
 
+    const status = data["status"];
+    if (isInProgress(status)) continue;
+
     notes.push({
       slug: slugify(fileName),
       category,
