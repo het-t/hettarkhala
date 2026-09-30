@@ -3,7 +3,7 @@ title: Chapter 11, 12, 13, 14, 15 - Competitive Programmer's Handbook
 author: Antti Laaksonen
 date: 2026-09-19
 status: finished
-description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees
+description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees.
 ---
 
 # Graph terminology
