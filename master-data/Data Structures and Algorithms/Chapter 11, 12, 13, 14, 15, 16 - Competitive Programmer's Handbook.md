@@ -1,9 +1,9 @@
 ---
-title: Chapter 11, 12, 13, 14, 15 - Competitive Programmer's Handbook
+title: Chapter 11, 12, 13, 14, 15, 16 - Competitive Programmer's Handbook
 author: Antti Laaksonen
 date: 2026-09-19
-status: finished
-description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees.
+status: inprogress
+description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees, Directed graphs.
 ---
 
 # Graph terminology
@@ -175,4 +175,93 @@ To construct unique binary tree from traversal either
 
 1. pre-order and in-order or
 2. post-order and in-order traversal are needed.
+
+# Spanning trees
+
+Spanning tree of a graph consists of all nodes of the graph and some of the edges of the graph so 
+that there is a path between any two nodes.
+
+Spanning trees are connected and acyclic graphs.
+
+Minimum spanning tree is a spanning tree whose weight is as small as possible.
+
+## Kruskal's algorithm
+
+Initial spanning tree contains all the nodes of the graph and does not contain any edge.
+
+Then algorithm goes through the edges ordered by their weights, and always adds an edge to the 
+tree if it does not create a cycle.
+
+It maintains the components of the graph initially each nodes belongs to a separate component of
+their own, as edge is added it connects two separate components into one. Ultimately all nodes
+belongs to single component - and that is minimum spanning tree.
+
+Its implementation requires two operations
+1. to check if nodes belongs to the same component or not
+2. to unite separate components into one
+
+Union-find structure provides both of these operations in `O(log n)` time complexity.
+
+## Prim's algorithm
+
+Choose an arbitrary node.
+
+Always choose a minimum weight edge that adds a new node to the tree.
+
+Finally, all nodes have been added to the tree and minimum spanning tree has been found.
+
+It can be efficiently implemented by priority queue. Priority queue should contain all nodes that 
+can be connected to the current component using a single edge, in increasing order of the edge
+weight.
+
+Both Kruskal's and Prim's algorithm runs in `O(n + m log m)` time complexity.
+
+# Directed graphs
+
+Acyclic graph: there are not cycles in the graph
+
+Successor graph: outdegree of each node is 1, so each node has a unique successor.
+
+## Topological sorting
+
+It is an ordering of the nodes of a acyclic directed graph such that if there is a path from node 
+a to node b then node a appears before node b in the ordering.
+
+DFS can be used to both check if cycle is present, and if not, to construct a topological sort.
+
+Node can be in three states: 
+1. state 0: node has not been processed - white
+2. state 1: node is being processed - gray
+3. state 2: node has been processed - black
+
+If the graph contains a cycle, during the search we will encounter gray node.
+
+During search we maintain a list of nodes, and add node that are processed are added to the end of 
+the list, this list in reverse order is topological sort.
+
+Any dynamic programming problem can be represented as a directed acyclic graph, each node
+corresponds to a dynamic programming state and the edges indicate how the states depend on each 
+other.
+
+## Successor paths
+
+Successor graphs are sometimes called functional graphs - reason is that any successor graph 
+corresponds to a function that defines the edges of the graph. The parameter for the function is a 
+node of the graph and the function gives the successor of the that node.
+
+
+## Cycle detection
+
+## Floyd's algorithm
+
+It walks forward in the graph using two pointers a and b. Both begins at a node x that is starting 
+node of the graph. Then on each turn pointer a walks one step forward and pointer b walks two 
+steps forward. Process continues till both pointers meet each other.
+
+By this time, a has walked k steps, b has walked 2k steps, so cycle length divides k.
+
+Thus the first node that belongs to the cycle can be found by moving the pointer a to node x and 
+advancing the pointers step by step until they meet again.
+
+
 
