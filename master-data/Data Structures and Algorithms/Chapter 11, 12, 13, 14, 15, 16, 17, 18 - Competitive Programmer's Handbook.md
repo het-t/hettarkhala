@@ -1,9 +1,9 @@
 ---
-title: Chapter 11, 12, 13, 14, 15, 16, 17 - Competitive Programmer's Handbook
+title: Chapter 11, 12, 13, 14, 15, 16, 17, 18 - Competitive Programmer's Handbook
 author: Antti Laaksonen
 date: 2026-09-19
 status: inprogress
-description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees, Directed graphs, Connectivity
+description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees, Directed graphs, Connectivity, Tree queries.
 ---
 
 # Graph terminology
@@ -311,5 +311,73 @@ so that the formula is true.
 This can be done exactly when there are no nodes $$x_i$$  and $$\neg x_i$$ such that both nodes 
 belongs to the same strongly connected component.
 
+# Tree queries
 
+## Finding ancestors
+
+Easy way to find $$k$$th successor is to move $$k$$ times up the tree. But it has time complexity 
+$$O(n)$$.
+
+Efficient way is to have all values precomputed, where $$k \le n$$ is a power of 2. This 
+preprocessing takes $$O(n log n)$$ time. After this any query can be answered in $$O(log k)$$ time,
+by representing $$k$$ as sum of powers of 2.
+
+## Subtrees and paths
+
+A `tree traversal array` contains the nodes of a rooted tree in the order in which a DFS from the 
+root node visits them.
+
+### Subtree queries
+
+Each subtree of a tree corresponds to a subarray of the tree traversal array such that the first
+element of the subarray is the root node. This fact can be used to answer queries that are 
+related to subtrees of a tree.
+
+Consider a problem where each node is assigned a value, and our task is to support the following
+queries:
+1. Update the value of a node
+2. Calculate the sum of values in the subtree of a node.
+
+Key idea is to construct a tree traversal array that contains three values for each node:
+identifier of the node, the size of the subtree, and the value of the node.
+
+Now to answer the queries efficiently, it suffices to store the values of the nodes in a binary
+indexed or segment tree. After this both operations can be performed in $$O(log n)$$ time.
+
+### Path queries
+
+Consider following queries
+1. change the value of a node
+2. calculate the sum of values on a path from the root to a node
+
+This problem can be solved by constructing tree traversal array that stores node identifier, 
+subtree size and path sum from root to node.
+
+When the value of root is updated, values of all the nodes of the subtree has to be updated as 
+well.
+
+Fenwick or Segment tree can be used to manage this information in $$O(log n))$$ time.
+
+## Lowest common ancestor
+
+LCA of two nodes of a rooted tree is the lowest node whose subtree contains both the nodes.
+
+## Method 1
+
+Have two pointers pointing at nodes in the question, mode lower level point upwards until both
+are on the same level. Then move both of them until they meet on the same node - that node is 
+thier LCA.
+
+## Method 2
+
+Run DFS from root and maintain traversal array but this time, instead of adding node only first 
+time, add it into the list for each visit, along with its depth.
+
+Now to find the LCS of node a and node b, find node with minimum depth between node a and node b
+in the array.
+
+Thus if suffices to process a range minimum query.
+
+Similarly distances of nodes can be processed by adding both nodes depth and then subtracting
+depth of thier LCA.
 
