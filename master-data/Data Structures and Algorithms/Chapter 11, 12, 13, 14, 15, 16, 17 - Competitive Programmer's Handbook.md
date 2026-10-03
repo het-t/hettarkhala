@@ -1,9 +1,9 @@
 ---
-title: Chapter 11, 12, 13, 14, 15, 16 - Competitive Programmer's Handbook
+title: Chapter 11, 12, 13, 14, 15, 16, 17 - Competitive Programmer's Handbook
 author: Antti Laaksonen
 date: 2026-09-19
 status: inprogress
-description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees, Directed graphs.
+description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees, Directed graphs, Connectivity
 ---
 
 # Graph terminology
@@ -262,6 +262,54 @@ By this time, a has walked k steps, b has walked 2k steps, so cycle length divid
 
 Thus the first node that belongs to the cycle can be found by moving the pointer a to node x and 
 advancing the pointers step by step until they meet again.
+
+# Strong connectivity
+
+In a directed graph edges can only be traversed in one direction, so even if the graph is 
+connected it is not guaranteed that any two nodes will have path between them.
+
+Graph is strongly connected if there a path from any node to all other nodes in the graph.
+
+Strongly connected components of a graph divide the graph into strongly connected components that 
+are as large as possible. The strongly connected components form an acyclic component graph that
+represents the deep structure of the original graph.
+
+## Kosaraju's algorithm
+
+Performs two DFS to find strongly connected components of the graph.
+
+### Search 1
+
+Construct a list of nodes in the order in which a depth-first search processes them.
+
+### Search 2
+
+Reverse all the edges, process list of nodes created by the first search in reverse order.
+
+If nodes does not belong to a component, the algorithm creates a new component and starts a DFS 
+that adds all new nodes found during the search to the new component.
+
+## 2SAT problem
+
+$$
+(a_1 \lor b_1) \land (a_2 \lor b_2) \land \cdots \land (a_m \lor b_m)
+$$
+
+Each $$a_i$$ and $$b_i$$ is either a logical variable or negation of logical variable.
+
+This problem can be represented as a graph whose nodes correspond to variables $$x_i$$ and
+negations $$\neg x_i$$. Each pair $$a_i \lor b_i$$ generates two edges: 
+$$\neg a_i \rightarrow b_i \quad$$ 
+and 
+$$\quad \neg b_i \rightarrow a_i$$
+
+This means at least one of $$a_i$$ or $$b_i$$ must hold.
+
+Structure of this graph tells us whether it is possible to assign the values of the variable 
+so that the formula is true.
+
+This can be done exactly when there are no nodes $$x_i$$  and $$\neg x_i$$ such that both nodes 
+belongs to the same strongly connected component.
 
 
 
