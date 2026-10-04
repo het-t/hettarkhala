@@ -2,7 +2,7 @@
 title: Chapter 11, 12, 13, 14, 15, 16, 17, 18 - Competitive Programmer's Handbook
 author: Antti Laaksonen
 date: 2026-09-20
-status: inprogress
+status: finished
 description: Graphs, Graph traversal, Shortest paths, Trees, Spanning trees, Directed graphs, Connectivity, Tree queries.
 ---
 
