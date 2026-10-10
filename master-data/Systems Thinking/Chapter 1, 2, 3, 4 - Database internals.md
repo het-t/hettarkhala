@@ -6,10 +6,26 @@ status: inprogress
 description: Notes inspired from chapters 1 to 4 of database internals book.
 ---
 
-database categories
+The main objective of database management system is to provide efficient
+storage and retrieval of data.
 
+Database systems are categorized in various ways:
+
+1. Where they store data: in-memory databases, disk oriented databases
+2. Storage layout: row-oriented, column-oriented, wide-column based
+   etc. This does not provide complete categorization.
+   
 # Database architecture 
-client/server architecture
+
+Most database management systems are composed of smaller specialized subsystems, 
+this allows to use pluggable componenets.
+
+DBMS uses client/server architecture where database system instance take the role
+of servers and application instances take role of clients.
+
+Requests arrives through transport subsystem. Request come in the form of queries,
+often expressed in some query language. In multi-node systems transport subsystem is
+responsible for communication with other nodes too.
 transport subsystem
 query processor parses interprets validates the query, access control checks
 query optimizer eliminates impossible and redundant parts of the query,
@@ -107,6 +123,37 @@ if data is stored in a separate file and its order does not follow the key
 order, index is called non clustered 
 
 implicit primary key
+
+# Buffering immutability and ordering
+
+Storage structures have 3 common variables: buffering immutable files and store
+values in order or out of order
+
+### Buffering 
+
+Defines whether or not the storage structure chooses to collect certain
+amount of data in memory before putting it on disk
+
+smallest unit of data transfer to and from the disk is a block and it is 
+desirable to write full blocks
+
+### Mutability or immutability
+
+defines whether or not storage structure reads parts of the file, update them
+and writes the updated results at the same location in the file.
+
+Immutable structures are append-only: once written file contents are not 
+modified instead modifications are appended to the end of the file
+
+### Ordering
+
+whether or not the data records are stored in the key order in the pages on disk
+
+it often defines whether or not we can efficiently scan the range of records
+not only locate the individual data records.
+
+
+
 
 
 
