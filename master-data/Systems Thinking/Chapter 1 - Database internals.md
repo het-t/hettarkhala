@@ -1,6 +1,6 @@
 ---
-title: Introduction to storage engines.
-author: Antti Laaksonen
+title: Introduction to database management systems.
+author: Alex Petrov
 date: 2026-10-01
 status: finished
 description: Query lifecycle, classification of database management systems, storage structures, indexes.
@@ -115,7 +115,7 @@ In column-oriented database management systems instead of storing rows together,
 
 We have to store some metadata on the column level to identify which data points from other columns
 it is associated with. If done explicitly each value will have to hold a key, this introduces 
-redundancy and increases the amount od stored data.
+redundancy and increases the amount of stored data.
 
 Some column stores use implicit identifiers - virtual IDs instead and use the position of the 
 value to map it back to the related values.
@@ -140,7 +140,6 @@ Files are organized in a way that minimizes storage overhead per stored data rec
 Records can be located in minimal possible operations.
 ### Update efficiency
 Record updates are performed in a way that minimizes the number of changes in disk.
-storage efficiency access efficiency update efficiency .
 
 DBMS stores data records consisting of multiple fields in tables where each
 table if represented as a separate file, each record in table can be looked 
