@@ -161,10 +161,6 @@ deletion. Space shadowed by such tombstones is reclaimed at the time of garbage 
 Data files also called primary files can be implemented as index organized tables (IOT), 
 heap organized tables (heap files), hash organized tables (hashed files).
 
-When records are stored in a separate file, index files hold data entries
-uniquely identifying data records and containing enough information to 
-locate them in the data file for example row locators - offsets of data in data file.
-
 Records in heap files are not required to follow any particular order, most of the time 
 they are placed in a write order. Heap files requires some index strucltures pointing to the 
 locations where data records are stored, to make them searchable.
@@ -172,8 +168,9 @@ In hashed files data is stored in buckets and the hash values of the key determi
 record belongs to. Records in each bucket is stored in append order or sorted by key to improve
 look up speed. 
 
-When records are stored in a separate file, index file holds data entries uniquely indetifying 
-data records and containing enough information to locate them in the data file.
+When records are stored in a separate file, index files hold data entries
+uniquely identifying data records and containing enough information to 
+locate them in the data file for example row locators - offsets of data in data file.
 
 Index organized tables always store data records in index itself. Records are stored in key order, 
 this makes range scans in IOTs possible by sequentially scanning its contents.
