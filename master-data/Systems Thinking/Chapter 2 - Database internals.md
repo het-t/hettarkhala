@@ -2,8 +2,8 @@
 title: B-Tree basics.
 author: Alex Petrov
 date: 2026-10-02
-status: inprogress
-description: B-Tree operations and on-disk management.
+status: finished
+description: BST, B-Tree operations and on-disk management.
 ---
 
 # Binary search trees
