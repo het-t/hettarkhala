@@ -72,14 +72,20 @@ header, trailer or some separate file.
 
 ## Page structure 
 
-Difference between internal nodes and leaf nodes, internal nodes stores keys and pointer 
-pointing to child nodes, leaf nodes stores keys and corresponding value.
+Database system stores records and indexes in data files and index files. These
+files are split into many fixed size pages, each page can have multiple file 
+system blocks.
 
-In simple case triplet storing key, value and pointer to child node can be stored in page.
+We distinguish between internal nodes - storing keys and pointers to other nodes and leaf nodes - storing keys and corresponding value. 
+
+Each node occupied multiple pages linked together.
+
+In simple case triplet storing key, value and pointer to child node can be 
+stored in page.
 
 Downsides of triplet representation:
-If new node is to be added in some position other than the rightmost all next elements 
-have to be shifted to make space for it.
+If new node is to be added in some position other than the rightmost all next 
+elements have to be shifted to make space for it.
 
 It does not handle variable size records and works only for fixed size data.
 
@@ -100,12 +106,12 @@ to exact location inside page, so that we can perform reordering of nodes
 without worrying that out of page pointers may break.
 
 Organization technique called slot directory or slotted page can be used.
-This organize page into collection of slots and cells and split out pointers and 
-cells in two independent memory regions on different sides of page, each grows in 
-opposite directions toward each other.
+This organize page into collection of slots and cells and split out pointers 
+and cells in two independent memory regions on different sides of page, 
+each grows in opposite directions toward each other.
 
 Now we only need to reorganize pointers addressing the cells to maintain the order.
-Deleting record can be done by nullifying the pointer or by removing it
+Deleting record can be done by nullifying the pointer or by removing it.
 
 How this satisfies our desired properties 
 1. only overhead incurred is pointer array 
@@ -119,7 +125,7 @@ Using primitives construct cells, compose cells into pages and tree out of pages
 
 At cell level we differentiate between 2 types of cells: key cells and key-value cells
 
-Key cells store key and a pointer to page containing records between two neighboring keys.
+Key cells store separator key and a pointer to page containing records between two neighboring keys.
 
 Key value cells store key and data record associated with it.
 
@@ -129,7 +135,7 @@ is either fixed size or variable sized but not both.
 We can store some metadata related to values stored at page level inside key cell
 so we don't have to store it repeatedly in all cells.
 
-To compose a key cell
+To compose a key cell we need to know
 
 ex: 
 cell type - can be inferred from the page metadata,
@@ -139,7 +145,7 @@ key bytes
 
 fixed size cell will have no length specifiers
 
-To compose a key-value cell
+To compose a key-value cell we need to know
 
 ex: 
 cell type - can be inferred from the page metadata,
