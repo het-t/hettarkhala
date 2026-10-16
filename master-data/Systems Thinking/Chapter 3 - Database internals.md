@@ -6,15 +6,16 @@ status: finished
 description: Layout designing techniques for cells and pages.
 ---
 
-In-memory following pointer is simple as OS abstracts the underlying details,
+In memory following pointer is simple as OS abstracts the underlying details,
 by in-memory data structures and virtual memory.
 
 But for on-disk data structure memory offsets have to be computed to follow
 pointers, in addition this pointers have to be updated when pointed block
-is moved to some other location. This makes pointer management complex
-for on-disk data structures.
+is moved to some other location. We have to manage fragmentation, allocation
+and deallocation ourselves, this makes pointer management complex
+for on-disk data structures. 
 
-In case of B-Trees most of the complexity is due to pointer management operations like
+In case of B-Trees most of the complexity is due to its mutability
 node split, merge and pointer iterations like lookup and scans.
 
 Whereas LSM trees complexity is due to sorting, insertions and compaction.
@@ -23,19 +24,20 @@ Whereas LSM trees complexity is due to sorting, insertions and compaction.
 
 ## Primitive types 
 
-We can store many primitives and complex data types like strings, numbers, dates etc.
-These values are stored in their byte representation while storing it on-disk and 
-transmitting information over networks. 
+Keys and values have a data type such as string, number, datetime etc and can 
+be represented in their raw binary format. Similar guidelines can be used to 
+create new file storage protocols and communication protocols.
 
-Records consists of combinations of primitive values.
+Records consists of combinations of primitive values. However while during
+transmision over network or storage we can only transmit byte sequences.
 
 Thus, efficient procedures to serialize and deserialize this data has to be developed.
 
-In-case of multibyte data, byte order matters. There are two byte orders: 
-1. Little endianness - LSB of the data gets the smallest memory location
-2. Big endianness - MSB of the data gets the smallest memory location
+In-case of multibyte data, **byte order** - endianness matters. 
+1. Little endian - LSB of the data gets the lowest memory location
+2. Big endian - MSB of the data gets the lowest memory location
 
-In addition variable size data like strings exists too.
+In addition, variable size data like strings exists too.
 There are two ways to store strings:
 1. UCSD string or Pascal string - length followed by string value's binary form
 2. null terminated string - end of the string is represented by null \0
@@ -62,7 +64,7 @@ File may start with fix sized header and fixed size trailer containing auxiliary
 data that should be accessed quickly or is needed to deserialize rest of the data,
 rest of the file is split into pages.
 
-Memory hierarchy - primitives composed into fields, cells, pages, sectors. 
+Memory hierarchy - fields, primitives, cells, pages, sectors, regions. 
 
 Database files often contains multiple parts with a lookup table aiding 
 navigation and pointing to the start offsets of these parts written either in 
