@@ -145,4 +145,122 @@ It seems logical that increasing number of pages in cache, page evictions can be
 but if the page replacement policy is not optimal, it might cause more eviction 
 this is called **Beladys anomaly**, this makes situation worse.
 
+## FIFO and LRU
 
+Most naive page-replacement strategy is first-in, first out. It maintains a queue of 
+page IDs in their insertion order, adding new pages to the tail of the queue.
+Whenever page cache is full, it takes the element from the head of the queue to find
+the page that was paged in at the farthest point in time.
+Natural extension is least-recently used. It maintains a queue of eviction candidates 
+in insertion order, but allows to place a page back to the tail of the queue on repeated
+accesses, as if this was the first time it was paged in.
+
+2Q maintains two queues and puts pages into the first queue during the initial access
+and moves them to the second hot queue on subsequent access, allowing you to distinguish 
+between the recently and frequently accessed pages. 
+LRU-K identifies frequently referenced pages by keeping track of the last K accesses, and 
+using this information to estimate access times on a page basis.
+
+## Clock
+In some situations efficiency may be more important than precision.
+CLOCK algorithm variants are often used as compact, cache-friendly and concurrent 
+alternatives to LRU.
+
+Clock-sweep holds references to pages and associated access bits in a circular buffer.
+
+Many variants use counters instead of bits to account for frequency. Every time the
+page is accessed, its access bit is set to 1.
+
+Algorithm works by going around the circular buffer, checking access bits
+
+If the access bit is 1, and the page is unreferenced it is set to 0 and the next page
+is inspected
+
+If the access bit is 0, the page becomes a candidate and is scheduled for eviction.
+
+If the page is currently referenced, its access bit remains unchanged. It is assumed that 
+referenced page cannot have access bit 0.
+
+Sometimes it may be more practical to consider usage frequency rather than recency as a predictive factor. For database under heavy load, recency not be very indicative as
+it only represents the order in which items are accessed.
+
+## LFU
+
+To improve we can start tracking page reference events rather than page-in events.
+
+A frequency based page eviction policy does precisely this: instead of evicting pages
+based on page-in recency, it orders pages by usage frequency.
+
+Preserving an entire history might be prohibitively expensive for practical purposes.
+
+Admission - maintaining newly added elements, implemented using LRU policy
+Probation - holding elements most likely to get evicted
+Protected - holding elements that are to stay in the queue for a longer time
+
+Rather than choosing which elements to evict every time, this approach chooses which 
+ones to promote for retention. Only the items that have a frequency larger than the
+item that would be evicted as a result of promoting them, can be moved to the probation
+queue. On subsequent accesses, items can get moved from probation to the protected 
+queue. If the protected queue is full, one of the elements from it may have to be 
+placed back into probation. More frequently accessed items have a higher chance of 
+retention, and less frequently used one are more likely to be evicted.
+
+# Recovery
+
+Database systems are build on top of several hardware and software layers have their
+own stability and reliability problems.
+
+Database themselves as well as underlying components may fail.
+
+WAL - write ahead log or commit log is an append only auxiliary disk - resident 
+structure for crash and transaction recovery.
+
+Page cache allows buffering changes to page contents in memory. Until the cached 
+contents are flushed back to disk, the only disk-resident copy preserving the 
+operation history is stored in the WAL.
+
+WAL ensures that data makes it to the persistent storage and is available in case of 
+crash, as uncommitted data is replayed from the log and the pre-crash database state 
+is fully restored.
+
+# Log semantics
+
+Write ahead log is append only and immutable, so all writes to the log are sequential, 
+so readers can safely access its contents up to the latest write threshold while the 
+writer continues appending data to the log tail.
+
+Every record in the write ahead log has a unique monotonically increasing log 
+sequence number (LSN), the LSN is usually represented by an internal counter or 
+timestamp.
+
+Log records do not necessarily occupy an entire disk block, their contents are cached 
+in the log buffer, and are flushed on disk in a force operation. Forces happens when 
+log buffer fill up, and can be requested by the transaction manager or a page cache.
+
+All records have to be flushed on disk in LSN order.
+
+Besides individual operation records, WAL holds records indicating transaction 
+completion. A transaction can't be considered committed until the log is forced up to 
+the LSN of its commit record.
+
+Some systems use compensating log records during undo and store them in the log, to 
+make sure the system continue functioning correctly after a crash during rollback or 
+recovery.
+
+WAL is usually trimmed whenever a checkpoint is reached.
+
+Checkpoints are a way for a log to know that log records up to certain mark are fully
+persisted and are not required anymore, this significantly reduces the amount of work 
+required during the database startup. Process that forces all dirty pages to be 
+flushed on disk is generally called sync checkpoint.
+
+Flushing entire contents on disk is rather impractical and require pausing all running
+operations until the checkpoint is done. Most databases implement fuzzy checkpoints.
+**last_checkpoint** pointer stored in the log header contains the information about 
+last successful checkpoint. Fuzzy checkpoint begins with a special **begin_checkpoint**
+log record specifying its start, and ends with **end_checkpoint** log record, 
+containing information about dirty pages, and contents of a transaction table.
+
+Until all the pages specified by this record are flushed, the checkpoint is considered
+to be incomplete. Pages are flushed asynchronously and once this is one, **last_checkpoint** record is updated with the LSN of the **begin_checkpoint** record
+and in case of crash the recovery process will start from there.
