@@ -445,5 +445,139 @@ It assumes that transaction conflicts occur rarely and instead of locks we can
 validate transactions to prevent read/write conflicts with concurrently 
 executing transactions to ensure serializability.
 
+Transaction is split into 3 phases:
 
+#### Read phase
+Transaction executes its steps in its own private context, without having any
+of the changes visible to other transactions. After this phase all the 
+dependencies - read set is known as well as the side effects the transaction 
+produces - write set.
+
+#### Validation phase 
+Read and write sets of concurrent transactions are checked for the presence of 
+possible conflicts between their operations that might violate serializability.
+
+If some out of date data is read or it would overwrite some of the value written
+by other concurrent transactions that committed during its read phase, its
+private context is cleared and read phase is restarted. 
+
+Validation phase preserves ACID properties.
+
+#### Write phase
+If validation phase has not determined any conflicts, transaction can commit its
+write set from the private context to the database state.
+
+Validation phase can be done by checking for conflicts with the transactions 
+that have already been committed - backward oriented or with the transactions
+transactions that are currently in the validation phase - forward oriented.
+
+Validation and write phases of different transactions should be done atomically.
+No transaction is allowed to commit while some other transaction is in being 
+validated.
+
+This approach is efficient if conflicts are rare, because it conflict is 
+observed whole read phase which is the most expensive phase is retried.
+
+# Multi-version concurrency control
+
+It is a way to achieve transactional consistency by allowing multiple record 
+versions using monotonically incremented transaction IDs or timestamps.
+
+It distinguish between committed and uncommitted versions, last committed 
+version is assumed to be current. Goal of the transaction manager is to have at 
+most one uncommitted value at a time.
+
+# Pessimistic concurrency control
+
+These schemes determine transaction conflicts while they are running and block
+or abort their execution.
+
+Simplest lock free scheme is **timestamp ordering** where each transaction 
+has a timestamp.  
+
+Transaction manager maintains **max_read_timestamp** and 
+**max_write_timestamp** per value, describing read and write operations 
+executed by concurrent transacations.
+
+Read operations that attempt to read a value with a timestamp lower than 
+**max_write_timestamp** are aborted, as they're trying to read stale values.
+
+Write operations that attempt to write a value with a timestamp lower than 
+**max_read_timestamp** are aborted, as it will conflict with the recent read.
+
+**Thomas write rule** - write operations with timestamp value lower than 
+**max_write_timestamp** are allowed since we can safely ignore the outdated 
+written values.
+
+# Lock based concurrency control
+
+These are a form of pessimistic concurrency techniques.
+
+Explicit locks on the database objects are used rather than resolving schedules
+like timestamp ordering does.
+
+Downside is contention and scalability issues.
+
+Two phase locking separates lock management into two phases:
+1. Growing phase - during which all locks required by the transaction are
+   acquired and no locks are released.
+2. Shrinking phase - during which all locks acquired during the growing phase
+   are released.
+
+
+### Deadlocks
+
+If the lock cannot be granted immediately, a transaction has to wait until the 
+lock is released. 
+
+Two transactions might end up waiting for each other to release the locks - 
+deadlock.
+
+Simplest way to handle deadlocks is to introduce timeouts and abort long running
+transactions under the assumption that they might be in a deadlock.
+
+Deadlock can be detected by using waits-for-graph, if there is a cycle there is 
+a deadlock.
+
+Deadlock detection can be performed continuously or periodically. 
+
+If transaction T1 attempts to acquire a lock held by T2, and T1 has higher
+priority, T1 started before T2.
+
+Wait-die: T1 is allowed to block and wait for the lock. Otherwise T1 is aborted 
+and restarted. Transaction can only be blocked by a transaction with a 
+higher timestamp.
+
+Wound-wait: T2 is aborted and restarted. A transaction can be blocked only by a
+transaction with a lower timestamp.
+
+### Locks
+
+Locks are used to isolate and schedule overlapping transactions and manage
+database contents but not the internal storage structure, and are acquired on 
+the key. 
+
+Lock can guard a key or range of keys and is generally stored outside the tree 
+implementation.
+
+### Latches
+
+Guards physical representation. 
+
+Latches guard the physical tree representation during these operations and are 
+obtained on the page level. 
+
+### Reader writer lock
+
+We do not need to isolate all the processed from each other, we just have to
+make sure that reader do not overlap with writers, or multiple writers do not 
+overlap with each other.
+
+To achieve this level of granularity we can use a readers-writer lock or RW 
+lock.
+
+RW lock allow multiple readers to access the object concurrently, and only 
+writers have to obtain exclusive access to the object.
+
+### Latch crabbing
 
