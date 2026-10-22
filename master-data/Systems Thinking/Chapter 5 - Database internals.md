@@ -264,3 +264,186 @@ containing information about dirty pages, and contents of a transaction table.
 Until all the pages specified by this record are flushed, the checkpoint is considered
 to be incomplete. Pages are flushed asynchronously and once this is one, **last_checkpoint** record is updated with the LSN of the **begin_checkpoint** record
 and in case of crash the recovery process will start from there.
+
+## Operation vs data log
+
+shadow paging copy on write technique
+physical and logical logging 
+logical logging for undo 
+physical logging for redo 
+
+## Steal and force policies 
+
+defined policies that determines when the changes made in memory have to be made persistent on disk
+mostly applicable to page cache
+choice of policy have impact on which recovery methods can be used
+steal policy - allows flushing modified pages even before the transaction is committed
+no steal policy - does not allow to flush any uncommitted transaction's content on disk
+force policy - requires all modified pages to be flushed on disk before the transaction is committed
+no force policy - allows the transaction to be committed even if all the modified pages are not flushed 
+on disk
+
+no steal allows to implement recovery just by storing redo entries, old copy is stored on disk and 
+modification is stored in log 
+with no force we can buffer several changes by deferring them, pages have to be cached during this period 
+hence bigger page cache is needed
+if force policy is used recovery don't need any additional operations, as pages committed by these 
+transactions are already flushed on disk, downside is that transactions take longer to commit as I/O 
+increases
+
+Until the transaction commit, we have to store enough information to undo its results
+if any pages touched by the transaction are flushed we have to store undo information until the 
+transaction commits, if pages are not flushed we have to store redo information until transaction commits.
+
+## ARIES
+
+steal/no-force policy
+uses physical logs for redo operations - pointer switches improves performance as it takes less time 
+uses logical logs for undo operations - as undo operations can be performed on pages individually, logical
+logs improves concurrency
+uses WAL records to implement repeating history during recovery to reconstruct complete database state 
+before undoing uncommitted transactions and creates compensation log records during undo
+
+Recovery proceeds in 3 steps 
+1. Analysis phase identifies dirty pages in the page cache and transactions that were in progress at the
+   time of crash. Information about dirty pages is used to identify the starting point of redo phase. List
+   of in progress transactions is used during undo phase to rollback incomplete changes.
+2. Redo phase repeats the history up to the point of crash and restores the database to previous state.
+   This phase is done for both incomplete transactions as well as for ones that were completed but changes
+   were not flushed on disk.
+3. Undo phase rolls back all the incomplete transactions and restores the database to the last consistent
+   state. All operations are rollbacked in reverse order, in case the database crashes again during
+   recovery, operations that undo transactions are also logged as well to avoid repeating them.
+
+# Concurrency control
+
+Concurrency control is set of techniques for handling interactions between 
+concurrently executing operations.
+
+### Optimistic concurrency control 
+Allows transactions to execute concurrent read and writer operations and 
+determines whether or not the result of the combined execution is serializable.
+Transactions do not block each other, maintain histories of their operations 
+and check these histories for possible conflicts before commit. If conflict is 
+observed one of the conflicting transactions is aborted.
+
+### Multi-version concurrency control 
+Guarantees consistent view of database at some point in the past identified 
+by the timestamp by allowing multiple timestamped versions of the records to be 
+present. MVCC can be implemented using validation techniques, allowing only one 
+of the updating or committing transactions to win, as well as with lockless 
+techniques such as timestamp ordering or lock based ones, such as two phase 
+locking.
+
+### Pessimistic concurrency control 
+Both lock-based and nonlocking conservative methods are available.
+Lock based approaches require transactions to maintain locks on database records
+to prevent other transactions from modifying and accessing locked records until 
+the transaction releases its locks. 
+
+This can result in deadlock when multiple transaction wait for each other to 
+release a lock.
+
+
+Set of problems that we're trying to solve, how transactions overlap and what 
+consequences this overlapping has.
+
+## Serializability 
+**Schedule** is a list of operations required to execute a set of transactions 
+from the database system perspective. 
+
+A schedule is **complete** if contains all operations from every transaction 
+executed in it.
+
+**Correct** schedule are logical equivalents to the original lists of 
+operations, but their parts can be executed in parallel or get reordered for 
+optimization purposes, as long as this does not violate ACID properties and the 
+correctness of the results of individual transactions.
+
+Schedule is **serial** when transaction in it are executed completely 
+independent and without interleaving - every transaction is fully executed 
+before the next one starts.
+
+Always executing transactions in serial order, significantly reduces throughput 
+and hurt performance.
+
+Schedule is **serializable** if it is equivalent to some complete serial 
+schedule over the same set of transactions.
+
+## Transaction isolation 
+
+Isolation levels specifies how and when parts of the transaction can and should
+become visible to other transactions. It describe the degree to which 
+transactions are isolated from other concurrently executing transactions.
+
+To prevent incomplete or temporary writes from propagating over transaction
+boundaries, we need additional coordination and synchronization which negatively
+impacts the performance.
+
+## Read and write anomalies 
+
+SQL standard refers to and describes **read anomalies** that can occur during
+execution of concurrent transaction: dirty, nonrepeatable and phantom reads.
+
+**Dirty read** is a situation where transaction can read uncommitted changes 
+from other concurrently executing transaction which later rollbacks the changes.
+
+**Non repeatable reads** occur when same transaction tries to read record for 
+multiple times and do not get the same result each time.
+
+**Phantom reads** is equivalent to non-repeatable reads but holds for range 
+queries.
+
+There are write anomalies with similar semantics: lost update, dirty write and 
+write skew.
+
+**Lost update** occurs when wo transactions T1, T2 both attempts to update the 
+value of V. T1 and T2 read the value of V. T1 updates V and commits, then T2 
+updates V and commits. T1, T2 are not aware of each other, hence if both are 
+permitted to commit the results of T1 will be overwritten by the results of T2 
+and update from T1 will be lost.
+
+**Dirty write** occurs when one of the transactions takes an uncommitted value
+modified it and saves it, all based on the value that was never committed.
+
+**Write skew** occurs when each individual transaction respects the required 
+invariants but their combinations does not satisfy these invariants. T1, T2 
+modify values of two accounts A1 and A2. A1 starts with 100, A2 starts with 
+150. Account value is allowed to be negative, as long as their sum is non-
+negative. T1 and T2 each attempt to withdraw 200 from A1 and A2, respectively. 
+At the start sum is 250, both transactions assume they are preserving the 
+invariant and are allowed to commit, in the end A1 is -100 and A2 is -50, which 
+clearly violates the requirement to keep a sum of the accounts non-negative.
+
+## Isolation levels
+
+Read uncommitted - dirty reads are allowed 
+Read committed - dirty reads are not allowed, repeatable reads and phantom 
+reads are allowed
+Repeatable read isolations levels - phantom reads are allowed
+
+Strongest isolation level is serializability. It guarantees that transaction
+outcomes will appear in some order as if transactions were executed serially. 
+
+Serializability is a property of multiple operations executed in arbitrary 
+order. It does not imply or attempt to impose any particular order on executing 
+transactions.
+
+In **snapshot isolation** transaction can observe the state changes performed by
+all transactions that were committed by the time it has started. Each 
+transaction takes a snapshot of data and execute queries against it. If any 
+values modified by the transaction is changed by some other transaction, the 
+transaction is rolled back. 
+
+**Write skew** anomaly is possible under snapshot isolation, since if two 
+transactions read from local state, modify independent records and preserve 
+local invariants they both are allowed to commit.
+
+# Optimistic concurrency control
+
+It assumes that transaction conflicts occur rarely and instead of locks we can 
+validate transactions to prevent read/write conflicts with concurrently 
+executing transactions to ensure serializability.
+
+
+
