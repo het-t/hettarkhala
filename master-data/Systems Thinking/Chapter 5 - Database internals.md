@@ -62,20 +62,20 @@ state are first applied to the cached pages.
 not yet synchronized with persistent storage to guarantee they won't be lost in 
 case of a crash. The log is used to reapply these operations and reconstruct the cached 
 state during startup. Log entries can also be used to undo changes done by the 
-abortes transactions.
+aborted transactions.
 
 # Buffer management
 
-Most database uses both memory: slower persistent storge and faster main memroy.
+Most database uses both memory: slower persistent storge and faster main memory.
 To reduce number of accesses to persistent storage pages are cached in memory.
 When the page is requested again by the storage layer, its cached copy is returned.
 
-Cached pages available in memory can be reused under the assumption that no other proces
+Cached pages available in memory can be reused under the assumption that no other process
 has modified the data on disk. This approach is sometimes referenced as **virtual disk**.
 
 More common name is **page cache** or **buffer pool**.
 
-Uncached pages are said to be paged in when they are loaded from disk. If any changes 
+Un-cached pages are said to be paged in when they are loaded from disk. If any changes 
 are made to the cached page, it is said to be dirty, until these changes are flushed
 back on disk.
 
@@ -88,7 +88,7 @@ one of the cached pages has to be **evicted**.
 All changes made to buffers are kept in memory until they are eventually written back to the disk.
 No other process is allowed to make changes to the backing file.
 
-When page is requested, first we check if it cached, in which case the cached page contents
+When page is requested, first we check if it is cached, in which case the cached page contents
 are returned. If page contents are not yet cached, the cache translates the logical 
 page address or page number to its physical address, loads contents in memory, and returns
 cached version to the storage engine. Once returned buffer with cached page contents is said 
@@ -174,21 +174,22 @@ page is accessed, its access bit is set to 1.
 Algorithm works by going around the circular buffer, checking access bits
 
 If the access bit is 1, and the page is unreferenced it is set to 0 and the next page
-is inspected
+is inspected.
 
 If the access bit is 0, the page becomes a candidate and is scheduled for eviction.
 
 If the page is currently referenced, its access bit remains unchanged. It is assumed that 
 referenced page cannot have access bit 0.
 
-Sometimes it may be more practical to consider usage frequency rather than recency as a predictive factor. For database under heavy load, recency not be very indicative as
+Sometimes it may be more practical to consider usage frequency rather than recency as a predictive factor. For database under heavy load, 
+recency is not very indicative as
 it only represents the order in which items are accessed.
 
 ## LFU
 
 To improve we can start tracking page reference events rather than page-in events.
 
-A frequency based page eviction policy does precisely this: instead of evicting pages
+A frequency-based page eviction policy does precisely this: instead of evicting pages
 based on page-in recency, it orders pages by usage frequency.
 
 Preserving an entire history might be prohibitively expensive for practical purposes.
@@ -207,12 +208,12 @@ retention, and less frequently used one are more likely to be evicted.
 
 # Recovery
 
-Database systems are build on top of several hardware and software layers have their
+Database systems are built on top of several hardware and software layers having their
 own stability and reliability problems.
 
 Database themselves as well as underlying components may fail.
 
-WAL - write ahead log or commit log is an append only auxiliary disk - resident 
+WAL - write ahead log or commit log is an append only auxiliary disk-resident 
 structure for crash and transaction recovery.
 
 Page cache allows buffering changes to page contents in memory. Until the cached 
@@ -234,8 +235,8 @@ sequence number (LSN), the LSN is usually represented by an internal counter or
 timestamp.
 
 Log records do not necessarily occupy an entire disk block, their contents are cached 
-in the log buffer, and are flushed on disk in a force operation. Forces happens when 
-log buffer fill up, and can be requested by the transaction manager or a page cache.
+in the log buffer and are flushed on disk in a force operation. Forces happen when 
+log buffer fill up and can be requested by the transaction manager or a page cache.
 
 All records have to be flushed on disk in LSN order.
 
@@ -262,22 +263,35 @@ log record specifying its start, and ends with **end_checkpoint** log record,
 containing information about dirty pages, and contents of a transaction table.
 
 Until all the pages specified by this record are flushed, the checkpoint is considered
-to be incomplete. Pages are flushed asynchronously and once this is one, **last_checkpoint** record is updated with the LSN of the **begin_checkpoint** record
+to be incomplete. Pages are flushed asynchronously and once this is done, 
+**last_checkpoint** record is updated with the LSN of the **begin_checkpoint** record
 and in case of crash the recovery process will start from there.
 
 ## Operation vs data log
 
-shadow paging copy on write technique
-physical and logical logging 
-logical logging for undo 
-physical logging for redo 
+Shadow paging - a copy on write technique ensures data durability and transaction 
+atomicity. New Contents are placed into new unpublished shadow page and made visible 
+by pointer flip from the old page to the new one holding updated contents.
+
+Updates can be represented by before and after images or by corresponding 
+undo and redo operations.
+
+Physical log stores complete page state or byte-wise changes to it.
+
+Logical log stores operations that have to be performed against current state to 
+move records or pages from one state to the other. It is critical to track exact 
+state of the pages that physical and logical records can be applied to.
+
+Mostly combination of both physical and logical logging is used, 
+logical logging for undo - for concurrency and performance
+and physical logging for redo - to improve recovery time.
 
 ## Steal and force policies 
 
-defined policies that determines when the changes made in memory have to be made persistent on disk
-mostly applicable to page cache
-choice of policy have impact on which recovery methods can be used
-steal policy - allows flushing modified pages even before the transaction is committed
+Defines policies that determines when the changes made in memory have to be made persistent on disk.
+
+Choice of policy have impact on which recovery methods can be used
+steal policy - allows flushing modified pages even before the transaction is committed,
 no steal policy - does not allow to flush any uncommitted transaction's content on disk
 force policy - requires all modified pages to be flushed on disk before the transaction is committed
 no force policy - allows the transaction to be committed even if all the modified pages are not flushed 
@@ -297,11 +311,14 @@ transaction commits, if pages are not flushed we have to store redo information 
 
 ## ARIES
 
-steal/no-force policy
-uses physical logs for redo operations - pointer switches improves performance as it takes less time 
-uses logical logs for undo operations - as undo operations can be performed on pages individually, logical
+It implements steal/no-force policy.
+
+Uses physical logs for redo operations - pointer switches improve performance as it takes less time 
+
+Uses logical logs for undo operations - as undo operations can be performed on pages individually, logical
 logs improves concurrency
-uses WAL records to implement repeating history during recovery to reconstruct complete database state 
+
+Uses WAL records to implement repeating history during recovery to reconstruct complete database state 
 before undoing uncommitted transactions and creates compensation log records during undo
 
 Recovery proceeds in 3 steps 
@@ -321,13 +338,16 @@ Concurrency control is set of techniques for handling interactions between
 concurrently executing operations.
 
 ### Optimistic concurrency control 
-Allows transactions to execute concurrent read and writer operations and 
+
+Allows transactions to execute concurrent read and write operations and 
 determines whether or not the result of the combined execution is serializable.
+
 Transactions do not block each other, maintain histories of their operations 
 and check these histories for possible conflicts before commit. If conflict is 
 observed one of the conflicting transactions is aborted.
 
 ### Multi-version concurrency control 
+
 Guarantees consistent view of database at some point in the past identified 
 by the timestamp by allowing multiple timestamped versions of the records to be 
 present. MVCC can be implemented using validation techniques, allowing only one 
@@ -336,7 +356,9 @@ techniques such as timestamp ordering or lock based ones, such as two phase
 locking.
 
 ### Pessimistic concurrency control 
+
 Both lock-based and nonlocking conservative methods are available.
+
 Lock based approaches require transactions to maintain locks on database records
 to prevent other transactions from modifying and accessing locked records until 
 the transaction releases its locks. 
@@ -344,15 +366,15 @@ the transaction releases its locks.
 This can result in deadlock when multiple transaction wait for each other to 
 release a lock.
 
-
 Set of problems that we're trying to solve, how transactions overlap and what 
 consequences this overlapping has.
 
 ## Serializability 
+
 **Schedule** is a list of operations required to execute a set of transactions 
 from the database system perspective. 
 
-A schedule is **complete** if contains all operations from every transaction 
+A schedule is **complete** if it contains all operations from every transaction 
 executed in it.
 
 **Correct** schedule are logical equivalents to the original lists of 
@@ -404,7 +426,7 @@ permitted to commit the results of T1 will be overwritten by the results of T2
 and update from T1 will be lost.
 
 **Dirty write** occurs when one of the transactions takes an uncommitted value
-modified it and saves it, all based on the value that was never committed.
+modify it and saves it, all based on the value that was never committed.
 
 **Write skew** occurs when each individual transaction respects the required 
 invariants but their combinations does not satisfy these invariants. T1, T2 
