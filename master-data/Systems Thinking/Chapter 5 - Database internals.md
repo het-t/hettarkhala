@@ -581,3 +581,23 @@ writers have to obtain exclusive access to the object.
 
 ### Latch crabbing
 
+Trivial approach is to grab all the latches on the way from the root to the 
+target leaf. This creates concurrency bottleneck and can be avoided in most 
+cases. Latch crabbing is simple method that allows holding latches for less time
+and releasing them as soon as it is clear that the executing operation does not
+require them anymore. 
+
+On the read path, as soon as the child node is located and its latch is acquired
+the parent node's latch can be released.
+
+During insert parent latch can be released if the operation is guaranteed not to
+result in any structural changes that can propagate to it. Parent latch can be 
+released if the child node is not full.
+
+During deletes, if the child node holds enough elements and operation will not 
+cause sibling nodes to merge, the latch on the parent node is released.
+
+This approach is optimistic - most inserts and deletes do not cause structural 
+changes that propagate multiple levels up, the probability of structural changes
+decreases at higher levels.
+
