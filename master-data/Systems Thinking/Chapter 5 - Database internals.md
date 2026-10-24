@@ -1,9 +1,9 @@
 ---
 title: Transaction processing and recovery.
 author: Alex Petrov
-date: 2026-10-05
-status: inprogress
-description: 
+date: 2026-10-06
+status: finished
+description: Durability, Buffer management, Transactions, Isolation levels, Locks and Latches.
 ---
 
 **Transaction** is an indivisible logical unit of work in a database management system,
@@ -442,7 +442,7 @@ clearly violates the requirement to keep a sum of the accounts non-negative.
 Read uncommitted - dirty reads are allowed 
 Read committed - dirty reads are not allowed, repeatable reads and phantom 
 reads are allowed
-Repeatable read isolations levels - phantom reads are allowed
+Repeatable read isolations level - phantom reads are allowed
 
 Strongest isolation level is serializability. It guarantees that transaction
 outcomes will appear in some order as if transactions were executed serially. 
@@ -479,7 +479,7 @@ produces - write set.
 Read and write sets of concurrent transactions are checked for the presence of 
 possible conflicts between their operations that might violate serializability.
 
-If some out of date data is read or it would overwrite some of the value written
+If some outdated data is read or it would overwrite some of the value written
 by other concurrent transactions that committed during its read phase, its
 private context is cleared and read phase is restarted. 
 
@@ -494,11 +494,11 @@ that have already been committed - backward oriented or with the transactions
 transactions that are currently in the validation phase - forward oriented.
 
 Validation and write phases of different transactions should be done atomically.
-No transaction is allowed to commit while some other transaction is in being 
+No transaction is allowed to commit while some other transaction is being 
 validated.
 
-This approach is efficient if conflicts are rare, because it conflict is 
-observed whole read phase which is the most expensive phase is retried.
+This approach is efficient if conflicts are rare, because if conflict is 
+observed whole read phase - the most expensive phase is retried.
 
 # Multi-version concurrency control
 
@@ -591,7 +591,7 @@ obtained on the page level.
 
 ### Reader writer lock
 
-We do not need to isolate all the processed from each other, we just have to
+We do not need to isolate all the processes from each other, we just have to
 make sure that reader do not overlap with writers, or multiple writers do not 
 overlap with each other.
 
