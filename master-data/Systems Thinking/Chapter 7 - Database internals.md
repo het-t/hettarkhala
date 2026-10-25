@@ -11,7 +11,7 @@ located first and then modified. This makes writes expensive.
 
 Immutable data structures are append-only, once written the record is never modified.
 These are write optimized, there might be multiple copied of the record available 
-while reading these records are traversed and reconciled. 
+while reading these records are traversed and reconciled.
 
 # LSM trees
 
