@@ -77,7 +77,7 @@ like fragmentation, space allocation and deallocation, as these are managed by o
 itself. These all together makes programming for memory much simpler than for disk.
 
 In turns memory is costlier than disk, its volatile hence power cuts, failures can cause data loss.
-Various alternatives exists that can make in-memory datastores more robust must it requires 
+Various alternatives exists that can make in-memory datastores more robust but it requires 
 complex infrastructure and operational expertise.
 
 ## Durability in memory-based stores
