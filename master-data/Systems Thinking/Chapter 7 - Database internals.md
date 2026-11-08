@@ -140,4 +140,94 @@ Multiple compaction processes can be carried out at the same time but only on no
 
 ### Leveled compaction
 
+Compaction opens up multiple opportunities for 
+optimizations and different strategies can be used for 
+compaction.
+
+In leveled compaction disk-resident tables are separated 
+into tables. Tables on each level have target sizes, and 
+each level have corresponding index. 
+
+Level with highest index is called the bottommost level. 
+
+Level0 tables are created by flushing memtable contents, 
+and may contain overlapping key ranges. As soon as number
+of tables in level 0 reaches a threshold their contents 
+are merged, creating new tables for level 1.
+
+Key ranges for the table on level 1 and higher levels do 
+not overlap, so tables on level 0 have to be partitioned 
+during compaction, split into non-overlapping ranges and 
+merged with tables holding corresponding key ranges at 
+higher levels. Alternatively compaction can include all 
+level0 and level1 tables and output partitioned level1 
+tables.
+
+Compaction on higher indexes pick tables from two
+consecutive levels with overlapping ranges and produce a 
+new table on a higher level.
+
+There is a threshold of number and size of tables on each
+level, once reached tables are merged with corresponding
+tables of higher level.
+
+Sizes grows exponentially at each level. Older data gradually
+migrates to higher level whereas freshest data is always 
+on the level with the lowest index.
+
+### Size-tiered compaction
+
+Rather than grouping disk-resident tables based on their 
+levels, they're grouped by size: smaller tables are
+grouped with smaller ones, and bigger table are grouped 
+with bigger ones.
+
+Level 0 holds the smallest tables that were either 
+flushed from memtables or created by the compaction 
+process. 
+
+When tables are compacted the resulting merged table is 
+written to the level holding tables with corresponding 
+size. Bigger tables are promoted to higher levels whereas
+smaller ones are demoted to lower levels.
+
+**Table starvation** - If compacted tables are still 
+small enough after compaction, higher levels may get 
+starved of compaction and their tombstones will not be
+taken into consideration increasing overall read costs,
+in such cases, compaction has to be forced for a level.
+
+**Time window compaction strategy** - takes write 
+timestamps into consideration and allows dropping entire 
+files that hold data for an already expired time range
+without going through any compaction process.
+
+# Read, write and space amplification 
+
+**Read amplification** - need to address multiple tables 
+to retrieve data.
+
+**Write amplification** - caused by continuous rewrites 
+by compaction process.
+
+**Space amplification** - arise from storing multiple 
+copies associated with same key.
+
+Reclaiming space occupied by duplicate records and reduce
+space overhead, increases write amplification. Avoiding 
+write amplification increases read amplification - due to
+overhead from reconciling data records associated with 
+the same key during the read.
+
+In B-Trees write amplification is due to repeated writes
+to the same node, whereas in LSM-Trees write amplification
+is caused by migrating data from one file to another 
+during compaction process.
+
+## RUM conjecture
+
+It states that reducing two of these overheads inevitably
+leads to change for the worse in the third one.
+
+# Sorted string tables 
 
