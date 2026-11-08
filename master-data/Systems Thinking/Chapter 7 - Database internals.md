@@ -229,5 +229,128 @@ during compaction process.
 It states that reducing two of these overheads inevitably
 leads to change for the worse in the third one.
 
-# Sorted string tables 
+## Sorted string tables 
+
+Disk-resident tables are often implemented using **Sorted String Tables**.
+SSTable is stored as sorted in key order.
+
+SSTable have two components, index file and data files.
+
+Index files are implemented using some data structure 
+that provide efficient lookups, like logarithmic in case 
+of B-Tree and constant lookup time in case of hashtable.
+
+We can use hashtables for indexing and can still perform
+range scans, as a hashtable is only accessed to locate
+the first key in the range, and the range itself can be 
+read from the data file sequentially while the range 
+predicate matches.
+
+Since contents of data files are immutable, we can 
+construct index at the time of creating data file.
+
+## Bloom filters 
+
+Probabilistic structures allows to store approximate 
+information and perform queries that yield results with 
+an element of uncertainty.
+
+Bloom filter is space-efficient probabilistic data 
+structure that can be used to test membership of an 
+element for the given set.
+
+It can produce false-positive, but never false-negative.
+
+If Bloom filter returns true for a membership check, the 
+element **might** be present in the set, but if the check
+returns false, the element is **definitely** not in the 
+set.
+
+It uses a large bit array and multiple hash functions.
+Hash functions are applied to keys of the record in the 
+table to find indices in the bit array, bits for which 
+are set to 1. Bits set to 1 in all positions determined 
+by the hash functions indicate a **presence** of the key 
+in the set. During lookup hash values are calculated 
+using all hash functions, and corresponding bits are 
+checked in bit-set.
+
+**Hash collision** - hash function applied to different
+keys returns the same value.
+
+Probability of false positive is configurable - larger 
+bit set and number of hash functions reduces false 
+positives, which in turns increase space utilized and 
+computation time respectively.
+
+## Skiplist
+
+Skiplists provides probabilistic complexity guarantees 
+close to those of search trees, with implementation 
+complexity closer to singly linked list.
+
+It consists of a series of nodes of different height, 
+building linked hierarchies allowing to skip ranges.
+
+Each node holds a key and unlike the nodes in a linked 
+list, some nodes have more than one successor. Node of 
+height h is linked from one or more predecessor of 
+height at most h. Nodes on the lowest level can be 
+linked from nodes of any height.
+
+Node height is determined by a random function. Nodes of 
+same height h constitues a level. Number of levels is 
+capped to avoid infinite growth, maximum height is 
+chosen based on hoe many items can be held by the 
+structure. There are exponentially fewer nodes on each 
+next level.
+
+During lookup node pointers on the highest levels are 
+followed, as soon as the search encounters the node 
+holding key larger than search key, node's predecessor's 
+link to the node on the next level is followed.
+
+# Unordered LSM storage
+
+## Bitcask
+
+Does not use memtables for buffering and stores data 
+directly in logfiles.
+
+To make values searchable, uses a data structure called 
+**keydir** that holds references to the latest data 
+records for corresponding keys.
+
+Old records may still be present on disk, but are not 
+referenced from keydir. Keydir is implemented as in-
+memory hashmap and have to be recalculated from 
+logfiles in case of restart.
+
+During compaction, contents of all logfiles are read 
+sequentially, merged and written to a new location, 
+preserving only live data records and old shadowed 
+records are discarded. Keydir is updated with new 
+pointers to relocated data records.
+
+Range queries can not be performed efficiently, as both 
+keys and data records are stored in unorder manner.
+
+## Wisckey
+
+It decouples sorting from garbage collection by keeping 
+the keys sorted in LSM Trees and keeping data records in 
+unordered append only files called **vLogs** - value 
+logs. Now we dont have to keep all keys in memory and rebuild a hashtable on startup.
+
+During compaction, vLog file contents are read 
+sequentially, merged and written to a new location. 
+Pointers are updated to point to these new locations.
+
+# Concurrency in LSM Trees
+
+
+
+
+
+
 
