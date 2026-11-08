@@ -125,3 +125,19 @@ To remove a consecutive range of keys rather than just a single key, **predicate
 
 This appends predicate to the table, during reconciliation data records 
 matching the predicate are skipped and not returned. 
+
+## Maintenance in LSM-Trees
+
+In B-Trees maintenance is needed to reclaim unused cells, defragmentation of pages.
+
+In case of LSM-Trees disk resident tables keep increasing, this can be reduced by periodic merge process.
+
+Compaction process picks multiple disk resident tables, and merge their contents using existing merge and 
+reconciliation algorithms, and writes out merged contents into new table - this reduces number of copies 
+and eventually total number of tables.
+
+Multiple compaction processes can be carried out at the same time but only on non-intersecting table sets.
+
+### Leveled compaction
+
+
