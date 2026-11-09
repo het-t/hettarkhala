@@ -348,6 +348,23 @@ Pointers are updated to point to these new locations.
 
 # Concurrency in LSM Trees
 
+During flush below rules have to be followed:
+1. new memtable has to become available for reads and writes.
+2. old memtable has to remain available for reads.
+3. flushing memtable has to be written on disk.
+4. discarding flushing memtable and making a flushed disk-resident table have to performed as an atomic operation.
+5. write ahead log segment, holding log entries of operations
+applied to the flushed memtable, has to be discarded.
+
+We have below synchronization points:
+
+Memtable switch: after memtable switch all writes go to the new 
+memtable whereas old one remains available for reads.
+
+Flush finalization: replaces the old memtable with flushed disk-resident table in the table view.
+
+Write-ahead log truncation: discards log segment holding records 
+associated with a flushed memtable.
 
 
 
