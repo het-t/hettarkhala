@@ -2,8 +2,8 @@
 title: Log-structure storage.
 author: Alex Petrov
 date: 2026-10-10
-status: inprogress
-description: 
+status: finished
+description: LSM-Trees maintenance.
 ---
 
 Immutable structures do not allow modifications to the existing files.
