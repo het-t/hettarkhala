@@ -2,7 +2,7 @@
 title: Distribute systems.
 author: Alex Petrov
 date: 2026-10-12
-status: inprogress
+status: finished
 description: Fallacies and difficulties in distributed systems.
 ---
 
@@ -108,5 +108,118 @@ for sometime. **Jitter** - tiny random time difference is added to cooling perio
 
 # Distribute systems abstractions 
 
+## Links 
 
+### Fair-loss link
 
+Two processes are connected with a **link**. After the message 
+$$M$$ is sent, from the sender's perspective the message can be in 
+the following states: not yet delivered but will be at some point 
+in time, irrecoverably lost during transport, successfully 
+deivbered to the remote process.
+
+Sender have no way to find out if the message is already delivered. 
+
+Properties:
+
+- Fair loss: if both sender and recipient are correct and the sender keeps retransmitting the message infinitely many times, it will eventually be delivered.
+
+- Finite duplication: send messages won't be delivered infinitely many times.
+
+- No creation: link will not come up with messages.
+
+We can introduce message acknowledgements to get more clarity in 
+terms of message status. Receivers notifies the sender that it has 
+received the message. To distinguish between messages **sequence 
+numbers** - monotonically increasing message identifiers are used.
+
+Even the acknowledgement messages can be lost during transmission, 
+to solve this problem and provide delivery guarantees, we can try 
+**retransmits** - sender sends message and then wait for specified 
+time period and then retries. This is called **stubborn link** 
+because sender keeps resending the message again and again 
+indefinitely.
+
+Retransmits can cause duplication, and it is only safe if the 
+operation is idempotent.
+
+## Message order
+
+Messages can arrive out of order and because of retransmits some 
+messages can arrive more than once. We can use sequence numbers to 
+ensure ordering at recepient's side.
+
+This type of link is called a **perfect link**.
+
+Properties of perfect link:
+
+**Reliable delivery** - every message send once by the correct process A to the correct process B, will eventually be delivered.
+
+**No duplication** - no message is delivered more than once.
+
+**No creation** - link do not come up with any message.
+
+# FLP impossibility 
+
+Consensus protocol describes a system that given multiple processes starting at its initial state, brings all of the processes to the decision state. It has to preserve 3 properties:
+
+**Agreement** - decision the protocol arrives at has to be unanimous. 
+
+**Validity** - agreed value has to be proposed by one of the participants, system should not just come up with the value.
+
+**Termination** - agreement is final only if there are no processes that did not reach the decision state.
+
+FLP impossibility says that given a completely asynchronous system, 
+we can not use any timeouts, and there is no reliable way to check 
+if some process has crashed or running slow, there exists no 
+protocol that can guarantee consensus in bounded time.  No 
+completely asynchronous consensus algorithm can tolerate 
+unannounced crash of even a single remote process.
+
+# System synchrony
+
+Processes cannot have arbitrarily different processing speeds and 
+links do not take indefinitely long to deliver messages. Hence the 
+assumptions can be loosened up and system can be though of as 
+partially synchronous - that exhibits some of the properties of the 
+synchronous system, but the bounds of message delivery clock drift, 
+and relative processing speeds might not be exact and hold only 
+**most of the times**.
+
+This allows us to use timeouts, and loose timing assumptions, which further allows us to use leader election, consensus, failure-detection etc, but they results in failures if the timing assumptions don't hold up.
+
+# Failure models
+
+Failure models describes exactly how processes can crash in distribute systems.
+
+## Crash faults
+
+Simplest way for a process to crash is by stopping the execution of 
+any further steps required by the algorithm and not sending any 
+messages to other processes. 
+
+**Crash-stops** prescribes that once the process has crashed, it 
+remains in that state. It do not discourage recovery or try to 
+prevent it, but once the process has crashed it is not allowed in 
+current round of negotiations, but can participant in next 
+instances.
+
+**Crash-recovery** assume that process can recover at later point, 
+and picks up processing from where it left off. This possibility of 
+recovery requires introducing a durable state and recovery protocol 
+into the system. Algorithms that allow crash-recovery need to take 
+all possible recovery states into consideration.
+
+## Omission faults
+
+It assumes that the process skips some of the algorithm steps, or 
+is not able to execute them, or this execution is not visible to 
+other participants, or it cannot send or receive messages to and 
+from other participants. It captures network partitions between the 
+processes caused by fault network links or network congestion.
+
+## Arbitrary faults
+
+Hardest class of failures to overcome is arbitrary or Byzantine 
+faults - process continues executing the algorithm steps, but in a 
+way that contradicts the algorithm.
