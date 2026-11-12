@@ -3,7 +3,7 @@ title: Leader election.
 author: Alex Petrov
 date: 2026-10-17
 status: inprogress
-description: Bully's algorithm.
+description: Bully algorithm, optimizations to reduce message passing and ring topology.
 ---
 
 Existence of the coordinator process reduces overall peer-to-peer message passing, by means of centralized process coordinator. 
@@ -33,4 +33,32 @@ with its own elected leader. This situation where multiple processes thinks them
 
 Another problem is if higher ranked proceses are unstable, system can go into permanent state of reelection, reducing availability. 
 
+# Next-in-line failover
 
+Each elected leader provides a list of failover nodes. When one of the process detects a leader failure, it starts a new election round by sending a 
+message to the highest-ranked alternative from the list provided by the failed leader. If one of the proposed alternative is up, it becomes new leader.
+
+# Candidate/Ordinatry optimization
+
+Number of messages can be reduced by splitting nodes into two subsets: candidates and ordinary. Only one of the candidates can become leader.
+
+# Invitation algorithm
+
+It allows processes to **invite** other processes to join their groups. This allows multiple leaders by definition, since each group has its own 
+leader.
+
+Each process starts as a leader of a new group, where only member is the process itself. Group leaders contacts peers that do not belong to their 
+groups, inviting them to join. If contacted peer is group leader itself, two groups are merged otherwise group's leader's ID is returned, to allow 
+direct contact.
+
+# Ring algorithm 
+
+All nodes in system form a ring and are aware of ring topology, all its predecessor and successors. When process detects the leader failure, it starts 
+the new election round. Election message is forwarded across the ring - each process contacts its successor. If the node is unavailable, the process 
+skips the unreachable node and attempts to contact the nodes after it in the ring, until one of them responds. 
+
+Message is passed around the ring, collecting live nodes data, as it reaches the node who started election, the highest ranked node from the collected 
+live node set is chosen as a leader. 
+
+The ring might get partitioned into multiple disjoint parts, with each part potentially electing its own leader. Hence, ring algorithm do not 
+guarantee safety property.
