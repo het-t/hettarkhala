@@ -86,10 +86,13 @@ membership protocol (SWIM)** uses outsourced heartbeats. It does
 not require processes to be aware of all other processes in the 
 network, only a subset of connected peers.
 
-Process sends ping to a pee, if it does not respond, sender 
-selects multiple random members, these selected members try 
-sending heartbeat message, it the receiver process responds, 
-they forward acknowledgements back to original sender.
+Process selects a target and send it a direct ping, if the 
+target fails to respond to this ping in configured timeout, 
+sender requests indirect probes through randomly selected 
+multiple intermediaries which attempts to ping the target on 
+behalf of original sender. If they receive acknowledgement from 
+the target, it is relayed to the original sender, otherwise the 
+target is marked as suspected.
 
 This accounts for both direct and indirect reachability. It does 
 not require broadcasting messages to a broad group of peers. The 
