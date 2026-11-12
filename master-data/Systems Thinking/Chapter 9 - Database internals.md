@@ -1,9 +1,9 @@
 ---
 title: Failure detection.
 author: Alex Petrov
-date: 2026-10-14
-status: inprogress
-description: 
+date: 2026-10-15
+status: finished
+description: Pings, heartbeats, gossip, SWIM, phi-accural.
 ---
 
 For a system to appropriately react to failures, 
@@ -79,11 +79,88 @@ Heartbeat counters represents global and normalized view of the system.
 We might end up marking a process reachable even when the direct link
 between processes is faulty.
 
+# Outsourced heartbeats 
 
+**Scalable weakly consistent infection-style process group 
+membership protocol (SWIM)** uses outsourced heartbeats. It does 
+not require processes to be aware of all other processes in the 
+network, only a subset of connected peers.
 
+Process sends ping to a pee, if it does not respond, sender 
+selects multiple random members, these selected members try 
+sending heartbeat message, it the receiver process responds, 
+they forward acknowledgements back to original sender.
 
+This accounts for both direct and indirect reachability. It does 
+not require broadcasting messages to a broad group of peers. The 
+requests can be sent in parallel hence more information can be 
+collected in less time.
 
+## Phi-Accural failure detector
 
+Previous approaches treats process status as binary value - 
+either up or down. Phi-accural has a continuous state, it 
+captures the probability of the monitored process's crash.
 
+It maintains a sliding window, collecting arrival times of the 
+most recent heartbeats from the peer processes. This information 
+is used to approximate arrival time of the next heartbeat, 
+compare this approximation with the actual arrival time and 
+compute the suspicion level (phi): how certain the failure 
+detector is about the failure, given the current network 
+condition.
 
+It can be viewed as set of three subssytems:
 
+**Monitoring** - collecting liveness information through pings, 
+heartbeats or request-response sampling.
+
+**Interpretation** - making decision on whether or not the 
+process should be marked as suspected. 
+
+**Action** - callback executed whenever the process is marked 
+suspected.
+
+Collected arrival times are expected to follow normal 
+distribution, from which distribution parameters mean and 
+variance is calculated, which are then used to calculate how 
+likely we are to make right decision about process's liveness.
+
+## Gossip and failure detection
+
+It uses gossip to collect and distribute states of neighboring 
+processes.
+
+Each member maintains a list of other members, their **heartbeat 
+counters** and **timestamps** specifying when the heartbeat 
+counter was incremented for the last time.
+
+Periodically each member updates its counter and distributes its 
+list to a random peer, upon receiving it, node merges the list 
+with its own list.
+
+Nodes periodically check the list of states and heartbeat 
+counters. If any node's counter is not updated since long, it is 
+marked failed. This timeout should be configured carefully to 
+reduce probability of false-positives.
+
+## Reversing failure detection problem statement
+
+Propagating information about failures is not always possible, 
+and propagating it by notifying every member might be expensive, 
+one of the approaches called **FUSE - failure notification 
+service**.
+
+This approach arranges all active processes in groups, if one of 
+the group becomes unavailable, all participant detects the 
+failure. Every time a single process failure is detected it is 
+turned into group failure and then propagate.
+
+Processes in group periodically send ping messages to other 
+members, querying whether they're still alive. If one of the 
+process fails to respond the member that has initiated this ping 
+will in turns stop responding to ping messages itself.
+
+Absence of communication is used as failure propagation. 
+Applications can use their own definitions of propagated 
+failures.
