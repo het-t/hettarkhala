@@ -2,7 +2,7 @@
 title: Leader election.
 author: Alex Petrov
 date: 2026-10-17
-status: inprogress
+status: finished
 description: Bully algorithm, optimizations to reduce message passing and ring topology.
 ---
 
