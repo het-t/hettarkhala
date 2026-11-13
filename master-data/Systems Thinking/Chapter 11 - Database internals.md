@@ -142,6 +142,25 @@ arrive, and the event order is reconstructed from the logical timestamps. A happ
 
 This provides us session guarantees - monotonic reads, monotonic writes, read-your-writes, writes-follow-reads.
 
+## Vector clocks
+
+Vector clock is a structure for establishing a partial order between the events, detecting and resolving divergence between the event chains. Processes 
+maintains vectors of logical clocks. Every clock is incremented every time a new event arrives. When receiving clock vectors from other processes it is 
+merged with its own, preserving the highest.
+
+Whenever we make a write to the database, first check if the value for the written key already exists locally. If value exists, we append a new version 
+to the version vector and establish the causal relationship between the two writes. Otherwise new chain of events is started and initialized with a 
+single version.
+
+Replicas can diverge in two ways - we allow replicas to diverge by serving stale reads but also by accepting potentially conflicting writes.
+
+Vector clocks can help us detect write divergence, but the conflict resolution is application specific, hence some systems uses last-write wins 
+strategy to avoid providing application specific conflict resolution strategy.
+
+# Session models
+
+
+
 
 
 
