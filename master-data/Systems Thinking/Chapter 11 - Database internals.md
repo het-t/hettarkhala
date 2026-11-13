@@ -120,6 +120,30 @@ Linearizability requires coordination and ordering. It can be implemented by con
 Linearizability is regarded as local property and implies composition of independently implemented and verified elements. Combining linearizable 
 histories produces a history that is also linearizable. 
 
+# Sequential consistency 
+
+Sequential consistency allows ordering operations as if they were executed in some sequential order, while requiring operations of each individual 
+process to be executed in same order they were performed by the process.
+
+Processes can observe operations execute by other processes in the order consistent with their own history, but this view can be arbitrarily stale from
+the global perspective. Order of execution between processes is undefined as there is no shared notion of time, but all processes observe the 
+operations in the same order.
+
+Linearizability requires local order of each process and global order to be consistent - it respects a real-time operation order. Unlike 
+linearizability serializability is not composable.
+
+# Causal consistency
+
+All processes have to see **causally related** operations in the same order. Concurrent writes with no causal relationship can be observed in a 
+different order by different processors.
+
+If writes are causally dependent, even if later write propagates faster than the former one, it is not made visible until all of its dependencies 
+arrive, and the event order is reconstructed from the logical timestamps. A happend-before relationship is established logically.
+
+This provides us session guarantees - monotonic reads, monotonic writes, read-your-writes, writes-follow-reads.
+
+
+
 
 
 
