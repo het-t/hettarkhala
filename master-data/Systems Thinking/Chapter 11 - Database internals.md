@@ -88,3 +88,39 @@ We can think of consistency from the perspective of state, which state invariant
 copies of the data placed onto different replicas. Alternative is to consider operations consistency, it provides outside view on the data store,
 describes operations and puts constraints on the order in which they occur.
 
+# Strict consistency 
+
+It is equivalent of complete replication transparency - any write by any process in instantly available for the subsequent reads by any process. It is 
+just a theoretical model and it's not possible to implement.
+
+# Linearizability 
+
+It is the strongest single object, single operationc consistency model. Effects of the write become visible to all readers exactly once at some point 
+int time between its start and end, state transition or side effects of partial updates cannot be observed.
+
+Linearizability respects both process local operation order and the order of operation running in parallel relative to other processes, and defines a 
+**total order** of the events.
+
+This order should be **consistent** - every read of the shared value should return the latest value written to the shared variable preceding this read, 
+or the value of a concurrent write. It also implies mutual shared exclusion - only one write can proceed at a time.
+
+Even though operations are concurrent and have some overlap, they appear to be sequential. No operations are instantaneous but still appear atomic.
+
+## Liniearization point 
+
+Important trait of linearizability is visibility - once the operation is complete, everyone must see it, and the system cannot travel back in time. It 
+prevents stale reads and requires reads to be monotonic. Operations are not instaneous but their effects have to become visible at some point in time, 
+making it look like instantaneous. That time point is called **linearization point** - it serves as cutoff, after which operation effects become 
+visible to all clients.
+
+## Cost of linearizability 
+
+Linearizability requires coordination and ordering. It can be implemented by consensus.
+
+Linearizability is regarded as local property and implies composition of independently implemented and verified elements. Combining linearizable 
+histories produces a history that is also linearizable. 
+
+
+
+
+
