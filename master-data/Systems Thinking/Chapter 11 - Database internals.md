@@ -159,6 +159,52 @@ strategy to avoid providing application specific conflict resolution strategy.
 
 # Session models
 
+Session models help to reason about the state of the distributed system from the client perspective - how each client observes the state of the system 
+while issuing read and write operations. In distribute system, clients often can connect to any replica and if the results of the recent write against 
+one replica did not propagate to the other one, the client might not be able to observe the state change it has made.
+
+**read-own-writes** states that every read operation following the write on the same or the other replica has to observe the updated value.
+**Monotonic reads** restricts the value visibility and states that if any read has observed the value, later reads have to observe at least as recent 
+as that value. 
+**Monotonic writes** assumes that values originating from the same client appear in the order this client has executed them.
+**Writes-follow-reads** ensures that writes are ordered after writes that were observed by previous read operations.
+
+Session models make no assumptions about operations made by different processes. Combining monotonic reads, monotonic writes and read-own-writes gives 
+pipelined RAM (PRAM) consistency also known as FIFO consistency.
+
+# Eventual consistency 
+
+Sequential consistency allows reads to be propagate at different speed. Under **eventual consistency** updates propagate through the system 
+asynchronously. It states that if there are no additional updates performed against the data item, eventually all accesses return the latest written 
+value. Values from diverged replicas are reconciled using a conflict resolution strategy. 
+
+# Tunable consistency 
+
+Eventually consistent systems are describes in CAP terms: availability or consistency can be traded off for another. Eventually consistent systems usually implement tunable consistency, where data is replicated, read and written using below variables: 
+**Replication factor N** - number of nodes that will store a copy of data.
+**Write consistency W** - number of nodes that have to acknowledge a write for it to succeed.
+**Read consistency R** - number of nodes that have to respond to a read operation for it to succeed.
+
+Choosing consistency levels such that $$R + W > N$$, guarantees returning the most recent written values, because there is always an overlap between 
+read and write sets.
+
+Consistency level that consists of $$\floor{n / 2} + 1$$ nodes is called **quorum**, majority of nodes. Using quorums do not provide monotonic reads 
+guarantee, as the latest values might not be replicated to the contacted replica for read - to achieve monotonicity blocking read-repairs have to be 
+carried.
+
+# Witness replicas
+
+Using quorums for read consistency helps to improve availability - even if some nodes are down, we can still query other available nodes. But this 
+requires us to write to set of processes such that read set overlaps it, thus we have to store multiple copies of the data, this increases storage cost.
+Storage cost can be improved by using **witness replicas**. We can split replicas into **copy** and **witness** subsets. Copy replicas hold data 
+records, under normal operation, witness replicas merely store the record indicating the fact that the write operation occurred. A situation might 
+occur when the number of copy replicas is too low. In such cases actual values are replicated from copy replica to witness replica. As soon as the 
+original copy replicas recover, upgraded replicas can revert to their previous state, or recovered replicas can become witness. At any point there has 
+to be at least one copy replica in quorum.
+
+
+
+
 
 
 
