@@ -2,8 +2,8 @@
 title: Anti-entropy and Dissemination. 
 author: Alex Petrov
 date: 2026-10-20
-status: inprogress
-description: 
+status: finished
+description: Read repairs, Merkle trees, Bitmap vectors, Gossip.
 ---
 
 Message containing schema changes, membership information, node states, failures, cluster-wide metadata are generally infrequent and small, but have 
