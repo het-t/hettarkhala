@@ -2,8 +2,8 @@
 title: Replication and consistency.
 author: Alex Petrov
 date: 2026-10-19
-status: inprogress
-description: 
+status: finished
+description: CAP, Ordering, Strong and weak consistency models.
 ---
 
 **Consistency models** explain visibility semantics and behavior of the system in the presence of multiple copied of data.
@@ -202,14 +202,8 @@ occur when the number of copy replicas is too low. In such cases actual values a
 original copy replicas recover, upgraded replicas can revert to their previous state, or recovered replicas can become witness. At any point there has 
 to be at least one copy replica in quorum.
 
+# Strong eventual consistency and CRDTs
 
-
-
-
-
-
-
-
-
-
-
+Possible middle ground between strong consistency models (linearizability and serializability) and weak consistency models (eventual consistency), is 
+**strong eventual consistency**. Updates are allowed to propagate to servers late or out of order, but when all updates are finally propagated to 
+target nodes, conflicts between them can be resolved and they can be merged to product the same valid state.
