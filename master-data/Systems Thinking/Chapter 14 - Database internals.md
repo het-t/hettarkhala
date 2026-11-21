@@ -135,3 +135,20 @@ During replication phase, after collecting majority of votes, proposer can start
 The goal of the first algorithm phase is to establish a leader of the round and understand which value is going to be accepted, allowing the leader
 to proceed with the second phase - broadcasting the value.
 
+
+## Paxos algorithm
+
+Paxos algorithm can be split into two phases: voting and replication. Proposer is point of contact it receives a value that should be decided upon, 
+attempts to collect votes from the quorum of acceptors. When done, acceptors distribute the information about the agreed value to the learners, 
+ratifying the result. Learners increases replication factor of the agreed value.
+
+Only one proposer can collect the majority of votes, under some circumstances votes may get split evenly between the proposers, and neither one of 
+them will be able to collect a majority during this round, forcing them to restart.
+
+## Quorums in Paxos 
+
+Used to make sure that some of participants can fail, but still can proceed as long as we can collect votes from the alive ones.
+
+Quorum is the minimum number of votes required for the operation to be performed, this number usually constitutes majority of participants.
+
+Once sufficient number of participants accept the proposal, the value is guaranteed to be accepted by the protocol.
