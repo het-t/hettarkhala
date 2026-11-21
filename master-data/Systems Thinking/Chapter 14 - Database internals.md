@@ -206,6 +206,70 @@ the proposal dependencies based on their view of potentially conflicting proposa
 responses from a fast quorum of replicas, and their dependency lists are in agreement with each other and the leader itself, it can commit the 
 command.
 
+If leader does not receive enough responses or if the command lists received from the replicas differ and contain interfering commands, it updates 
+its proposal with a new dependency list and a sequence number. New dependency list is based on previous replica responses and combines all collected 
+dependencies. 
+
+There is two possible scenarios: 
+
+*Fast path* - when dependencies match and the leader can safely proceed with the command phase with only a fast quorum of replicas.
+
+*Slow path* - when there is a disagreement between the replicas and their command lists have to be updated before the leader can proceed with a 
+commit.
+
+EPaxos uses proposal numbers, which prevent stale messages from being propagated. Sequence numbers consist of any *epoch* - identifier of the current 
+cluster configuration that changes when nodes leave and join the cluster, a monotonically incremented node-local counter, and a replica ID. If 
+replica receives a proposal with a sequence number lower than one it has already seen, it negatively acknowledges the proposal, and sends the highest 
+sequence number and an updated command list known to it in response.
+
+# Flexible Paxos 
+
+Is it necessary to contact the majority of servers during every execution step?
+
+Do all quorums have to intersect? 
+
+In other words, does a quorum we use to pick a distinguished proposer, a quorum we use to decide on a value, and 
+every execution instance have to have nodes in common?
+
+In Paxos we only require the group of nodes from the first phase to overlap with the group from the second phase.
+
+Instead of defining quorums as majority, we can treat as non-empty group of nodes. If we define total number of participants as N, number of nodes 
+required for the propose phase to succeed as Q1 and the number of nodes required for the accept phase to succeed as Q2, we only need to ensure that 
+Q1 + Q2 > N. Since the second phase is usually more common than the first one, Q2 can contain only N/2 acceptors, as long as Q1 is adjusted to be 
+correspondingly larger. This is called Flexible Paxos.
+
+If we have five acceptors, as long as we require collecting votes from four of them to win the election round, we can allow the leader to wait for 
+responses from two nodes during the replication stage.
+
+It allows trading availability for latency: we reduce the number of nodes participating in the second phase but have to collect more votes, requiring 
+more participants to be available during the leader election phase. This configuration can continue the replication phase and tolerate failures up to 
+N - Q2 nodes, as long as the current leader is stable and new election round is not required.
+
+# Generalized solution to consensus
+
+Instead of splitting roles between the participants and having decision rounds, we can use a simple set of concepts and rules to achieve guarantees 
+of a single-decree Paxos.
+
+We have a client and a set of servers. Each server has multiple registers. A register has an index identifying it, can be written only once, and it 
+can be in one of three states: unwritten, containing the value and containing nil.
+
+Registers with the same index located on different servers from a *register set*. Each register can have one or more quorums. Depending on the state of the registers in it, a quorum can be in one of the undecided (Any and maybe v) or decided (none and decided v) states:
+
+*Any* - depending on future operations, this quorum set can decide on any value.
+
+*Maybe v* - if this quorum reaches a decision, its decision can only be v.
+
+*None* - this quorum cannot decide on the value.
+
+*Decided v* - this quorum has decided on the value v.
+
+
+
+
+
+
+
+
 
 
 
