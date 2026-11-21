@@ -152,3 +152,74 @@ Used to make sure that some of participants can fail, but still can proceed as l
 Quorum is the minimum number of votes required for the operation to be performed, this number usually constitutes majority of participants.
 
 Once sufficient number of participants accept the proposal, the value is guaranteed to be accepted by the protocol.
+
+## Failure scenarios
+
+If the original proposer fails during second phase, before broadcasting the value to all the acceptors. New proposer may pick up and commit the 
+value, distributing it to the other participants. If the failed proposer has sent accept message to even a single acceptor, later proposer can pick 
+that up and finish the broadcasting, the original proposer might not even be aware of this.
+
+This holds true only when the later proposer has some overlap with failed proposer, and that the acceptor in possession of failed proposal is 
+available.
+
+# Multi-Paxos 
+
+Classic Paxos algorithm requires propose round for each replication round, only after the proposer is established for the round, which happens after 
+a majority of the acceptors respond with a Promise to the proposer's Prepare, it can start the replication. We can introduce concept of distinguished 
+proposer - leader to avoid repeating proposal phase for each replication round.
+
+Leases can be used to ensure that we don't end up reading stale records from failed node that have restarted. Leases requires that clock drifts of 
+participants is under some upper bound.
+
+# Fast Paxos 
+
+Classic Paxos algorithm has a condition, where during the replication phase, the proposer can pick any value it has collected during the propose 
+phase. Fast Paxos has two types of rounds: classic - where the algorithm proceeds the same way as the classic version and fast - where it allows 
+acceptors to accept other values.
+
+In this algorithm we refer proposer that has collected a sufficient number of responses during the propose phase as a **coordinator** and reserve 
+term **proposer** for all other proposers.
+
+In fast round, if the coordinator is permitted to pick its own value during the replication phase, it can issue *Any* message to acceptors. Acceptors 
+in this case are allowed to treat *any* proposer's value as if it is a classic round and they received a message with this value from the coordinator.
+
+Fast round decreases total round trips by at least one. But is prone to *collisions*, which occurs if two or more proposers attempt to use the fast 
+step and acceptors receive different values. In such cases coordinator has to intervene and start a new round, to let acceptors **Propose** 
+converging single state.
+
+# Egalitarian Paxos
+
+Using a distinguished leader makes system prone to failures - new leader has to be elected when leader fails. Leader has to handle disproportionate 
+load. One way to handle avoid putting entire system's load onto single leader is to partition data in non-overlapping segments each with its own 
+leader. This way each segment can be scaled separately as per the need. But across the partition operations will require atomic commitment. 
+
+Instead of using a leader and proposal numbers for sequencing commands, we can use a leader responsible for the commit of the *specific* command and 
+establish the order by looking up and setting dependencies. This is called Egalitarian Paxos.
+
+EPaxos starts with a *pre-accept* phase, during which process becomes a leader for the specific proposal.
+Every proposal has to include: 
+*Dependencies* - all commands that potentially interfere with a current proposal, but are not necessarily already committed.
+*A sequence number* - this breaks cycles between dependencies. It is set with a value larger than any sequence number of the known dependencies. 
+
+After collecting this information it forwards a **Pre-Accept** message to *fast quorum* of replicas. Replicas check their local command logs update 
+the proposal dependencies based on their view of potentially conflicting proposals, and send their information back to the leader. If leader receives 
+responses from a fast quorum of replicas, and their dependency lists are in agreement with each other and the leader itself, it can commit the 
+command.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
