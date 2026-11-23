@@ -63,7 +63,7 @@ Caches data pages in memory.
 ### Recovery manager
 Maintains operation log and restores system in case of failure.
 
-Transactional manager and lock manager together are responsible for concurrent control.
+Transactional manager and lock manager together are responsible for concurrency control.
 
 # Memory versus Disk based DBMS
 
