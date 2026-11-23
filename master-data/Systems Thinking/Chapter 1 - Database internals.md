@@ -67,7 +67,7 @@ Transactional manager and lock manager together are responsible for concurrency 
 
 # Memory versus Disk based DBMS
 
-All types of DBMS uses both memory and disk. In-memory databases uses disk for checkpointing, 
+All types of DBMS uses both memory and disk. In-memory databases use disk for checkpointing, 
 backups, logging etc. Disk based databases uses memory for caching, buffering etc. The comparison is about what is the primary data storage.
 
 Using memory as primary data storage, allows to use various sorts of databases that will be very 
@@ -142,7 +142,7 @@ Records can be located in minimal possible operations.
 Record updates are performed in a way that minimizes the number of changes in disk.
 
 DBMS stores data records consisting of multiple fields in tables where each
-table if represented as a separate file, each record in table can be looked 
+table is represented as a separate file, each record in table can be looked 
 up using search key, to locate a record it uses indexes - auxiliary data
 structures that allow to efficiently locate data records without scanning 
 entire table every time
@@ -150,10 +150,10 @@ entire table every time
 Data files and index files are usually separated to store data and record metadata used to locate
 the records respectively. Index files are smaller than data files.
 
-Files are partitioned into pages, each of size of single of multiple disk blocks, 
+Files are partitioned into pages, each of size of single or multiple disk blocks, 
 pages can be organized as a sequence of records or as a slotted pages.
  
-Most systems do no explicitly deletion but deletion marker - tombstones are used to indicate 
+Most systems do no explicitly delete records but deletion marker - tombstones are used to indicate 
 deletion. Space shadowed by such tombstones is reclaimed at the time of garbage collection.
 
 ## Data files
@@ -162,7 +162,7 @@ Data files also called primary files can be implemented as index organized table
 heap organized tables (heap files), hash organized tables (hashed files).
 
 Records in heap files are not required to follow any particular order, most of the time 
-they are placed in a write order. Heap files requires some index strucltures pointing to the 
+they are placed in a write order. Heap files requires some index strutures pointing to the 
 locations where data records are stored, to make them searchable.
 In hashed files data is stored in buckets and the hash values of the key determines which bucket a
 record belongs to. Records in each bucket is stored in append order or sorted by key to improve
